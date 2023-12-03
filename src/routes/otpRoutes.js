@@ -43,4 +43,17 @@ router.post('/resend-otp/:userId', async (req, res) => {
     }
 });
 
+// Route for deleting OTP
+router.delete('/delete-otp/:userId', async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const result = await OtpController.deleteOtp(userId);
+        res.json(result);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 module.exports = router;
