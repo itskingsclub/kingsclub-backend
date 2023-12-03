@@ -2,14 +2,14 @@ const db = require('../config/db');
 
 class UserController {
     static async createUser(req, res) {
-        const { username, email, password, phone } = req.body;
+        const { user_name, email, password, mobile_number } = req.body;
 
         try {
-            const [result] = await db.execute('INSERT INTO users (username, email, password, phone) VALUES (?, ?, ?, ?)', [
-                username,
+            const [result] = await db.execute('INSERT INTO users (user_name, email, password, mobile_number) VALUES (?, ?, ?, ?)', [
+                user_name,
                 email,
                 password,
-                phone
+                mobile_number
             ]);
 
             res.json({ userId: result.insertId });
@@ -48,14 +48,14 @@ class UserController {
 
     static async updateUser(req, res) {
         const { userId } = req.params;
-        const { username, email, password, phone } = req.body;
+        const { user_name, email, password, mobile_number } = req.body;
 
         try {
-            const [result] = await db.execute('UPDATE users SET username=?, email=?, password=?, phone=? WHERE id=?', [
-                username,
+            const [result] = await db.execute('UPDATE users SET user_name=?, email=?, password=?, mobile_number=? WHERE id=?', [
+                user_name,
                 email,
                 password,
-                phone,
+                mobile_number,
                 userId,
             ]);
 

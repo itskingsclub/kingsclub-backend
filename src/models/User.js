@@ -1,12 +1,12 @@
 const db = require('../config/db');
 
 class User {
-    static async createUser(username, email, password, phone) {
-        const [result] = await db.execute('INSERT INTO users (username, email, password, phone) VALUES (?, ?, ?, ?)', [
-            username,
+    static async createUser(user_name, email, password, mobile_number) {
+        const [result] = await db.execute('INSERT INTO users (user_name, email, password, mobile_number) VALUES (?, ?, ?, ?)', [
+            user_name,
             email,
             password,
-            phone
+            mobile_number
         ]);
 
         return result.insertId;
@@ -23,12 +23,12 @@ class User {
   }
 
     static async updateUser(userId, newData) {
-        const { username, email, password, phone } = newData;
-        const [result] = await db.execute('UPDATE users SET username=?, email=?, password=?, phone=? WHERE id=?', [
-            username,
+        const { user_name, email, password, mobile_number } = newData;
+        const [result] = await db.execute('UPDATE users SET user_name=?, email=?, password=?, mobile_number=? WHERE id=?', [
+            user_name,
             email,
             password,
-            phone,
+            mobile_number,
             userId,
         ]);
 
