@@ -6,6 +6,12 @@ class OtpService {
         const res = await OtpController.sendOtp(mobile_number);
         return res;
     }
+
+    static async getOtp(mobile_number) {
+        // Send OTP
+        const res = await OtpController.getOtp(mobile_number);
+        return res;
+    }
 }
 
 module.exports = OtpService;

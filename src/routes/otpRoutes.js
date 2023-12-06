@@ -6,7 +6,6 @@ const router = express.Router();
 // Route for sending OTP
 router.post('/send-otp/', async (req, res) => {
     const { mobile_number } = req.body;
-
     try {
         const result = await OtpController.sendOtp(mobile_number);
         res.json(result);

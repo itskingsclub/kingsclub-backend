@@ -11,33 +11,65 @@ class UserController {
                 [mobile_number]
             );
 
+            const getOtp = await OtpService.getOtp(mobile_number);
+
             // User exists
             if (rows.length > 0) {
-                const sendOtp = await OtpService.sendOtp(rows[0]?.mobile_number);
+
+                if (!getOtp?.success) {
+                    const sendOtp = await OtpService.sendOtp(mobile_number);
                 if (sendOtp?.success) {
-                    res.json({ success: true, message: "User already exists, OTP sent successfully" })
-                }
-                else {
+                    res.json({
+                        success: true,
+                        message: "User already exists, OTP sent successfully",
+                        data: sendOtp?.data,
+                    });
+                } else {
                     res.status(500).json({
-                        success: false, message: 'Internal Server Error'
+                        success: false,
+                        message: "Internal Server Error",
                     });
                 }
-            }
-            else {
+                } else {
+                    res.json({
+                        success: true,
+                        message: "User already exists, OTP sent successfully",
+                        data: {
+                            code: getOtp?.data?.code
+                        }
+                    });
+                }
+            } else {
+
+                if (!getOtp?.success) {
                 const [result] = await db.execute(
                     "INSERT INTO users (user_name, email, password, mobile_number) VALUES (?, ?, ?, ?)",
                     [user_name, email, password, mobile_number]
                 );
-                const sendOtp = await OtpService.sendOtp(result.insertId);
+
+                    const sendOtp = await OtpService.sendOtp(mobile_number);
+
                 if (sendOtp?.success) {
-                    res.json({ success: true, message: "User created, OTP sent successfully" })
-                }
-                else {
+                    res.json({
+                        success: true,
+                        message: "User created, OTP sent successfully",
+                        data: sendOtp?.data,
+                    });
+                } else {
                     res.status(500).json({
-                        success: false, message: 'Internal Server Error'
+                        success: false,
+                        message: "Internal Server Error",
                     });
                 }
-
+                } else {
+                    res.json({
+                        success: true,
+                        message: "User created, OTP sent successfully",
+                        data: {
+                            code: getOtp?.data?.code
+                        }
+                    });
+                }
             }
         } catch (error) {
             res.status(500).send("Internal Server Error");
@@ -69,8 +101,8 @@ class UserController {
         res.json(rows);
     } catch (error) {
         console.error(error);
-          res.status(500).send("Internal Server Error");
-      }
+        res.status(500).send("Internal Server Error");
+    }
   }
 
     static async updateUser(req, res) {

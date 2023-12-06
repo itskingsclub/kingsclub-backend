@@ -1,4 +1,5 @@
 const Otp = require("../models/Otp");
+const db = require("../config/db");
 const { generateOtp, sendOtp } = require("../utils/otpUtils");
 
 class OtpController {
@@ -9,12 +10,40 @@ class OtpController {
 
             const createOtp = await Otp.createOtp(mobile_number, code, expiry);
             await sendOtp(mobile_number, code); // Implement your OTP sending logic
-            return { success: true, message: "OTP sent successfully" };
+            return {
+                success: true, message: "OTP sent successfully", data: {
+                    otp: code
+                }
+            };
         } catch (error) {
             return {
                 success: false,
                 message: "Internal Server Error",
             };
+        }
+    }
+
+    static async getOtp(mobile_number) {
+        try {
+            const [rows] = await db.execute("SELECT * FROM otp WHERE mobile_number = ?", [
+                mobile_number,
+            ]);
+
+            if (rows.length > 0) {
+                return {
+                    success: true,
+                    message: "Otp already exist.",
+                    data: rows[0]
+                };
+            } else {
+                return {
+                    success: false,
+                    message: "Otp dosn't exist.",
+                };
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).send("Internal Server Error");
         }
     }
 
