@@ -11,37 +11,14 @@ class UserController {
                 [mobile_number]
             );
 
-            const getOtp = await OtpService.getOtp(mobile_number);
-
             // User exists
             if (rows.length > 0) {
-
-                if (!getOtp?.success) {
-                    const sendOtp = await OtpService.sendOtp(mobile_number);
-                if (sendOtp?.success) {
-                    res.json({
-                        success: true,
-                        message: "User already exists, OTP sent successfully",
-                        data: sendOtp?.data,
-                    });
-                } else {
-                    res.status(500).json({
-                        success: false,
-                        message: "Internal Server Error",
-                    });
-                }
-                } else {
-                    res.json({
-                        success: true,
-                        message: "User already exists, OTP sent successfully",
-                        data: {
-                            code: getOtp?.data?.code
-                        }
-                    });
-                }
+                res.json({
+                    success: true,
+                    message: "User already exists, OTP sent successfully",
+                    data: sendOtp?.data,
+                });
             } else {
-
-                if (!getOtp?.success) {
                 const [result] = await db.execute(
                     "INSERT INTO users (user_name, email, password, mobile_number) VALUES (?, ?, ?, ?)",
                     [user_name, email, password, mobile_number]
@@ -59,15 +36,6 @@ class UserController {
                     res.status(500).json({
                         success: false,
                         message: "Internal Server Error",
-                    });
-                }
-                } else {
-                    res.json({
-                        success: true,
-                        message: "User created, OTP sent successfully",
-                        data: {
-                            code: getOtp?.data?.code
-                        }
                     });
                 }
             }
@@ -88,6 +56,35 @@ class UserController {
                 res.json(rows[0]);
             } else {
                 res.status(404).send("User not found");
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).send("Internal Server Error");
+        }
+    }
+
+    static async getUser(mobile_number) {
+        try {
+            const [rows] = await db.execute("SELECT * FROM users WHERE mobile_number = ?", [
+                mobile_number,
+            ]);
+
+            console.log("PV rows", rows)
+
+            if (rows.length > 0) {
+                res.json(rows[0]);
+                return {
+                    success: false,
+                    message: "User found",
+                    data: rows[0]
+                };
+            } else {
+                res.status(404).send("User not found");
+                return {
+                    success: true,
+                    message: "User not found",
+                    data: rows[0]
+                };
             }
         } catch (error) {
             console.error(error);

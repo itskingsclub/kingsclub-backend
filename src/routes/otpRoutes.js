@@ -4,16 +4,18 @@ const OtpController = require('../controllers/OtpController');
 const router = express.Router();
 
 // Route for sending OTP
-router.post('/send-otp/', async (req, res) => {
-    const { mobile_number } = req.body;
-    try {
-        const result = await OtpController.sendOtp(mobile_number);
-        res.json(result);
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Internal Server Error');
-    }
-});
+router.post('/send-otp', OtpController.createOtp);
+
+// router.post('/send-otp/', async (req, res) => {
+//     const { mobile_number } = req.body;
+//     try {
+//         const result = await OtpController.createOtp(mobile_number);
+//         res.json(result);
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).send('Internal Server Error');
+//     }
+// });
 
 // Route for verifying OTP
 router.post('/verify-otp/:userId', async (req, res) => {
