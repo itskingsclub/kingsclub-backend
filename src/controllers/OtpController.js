@@ -3,13 +3,19 @@ const { generateOtp, sendOtp } = require('../utils/otpUtils');
 
 class OtpController {
     static async sendOtp(userId) {
-        const code = generateOtp(); // Implement your OTP generation logic
+        try {
+            const code = generateOtp(); // Implement your OTP generation logic
         const expiry = new Date(Date.now() + 5 * 60 * 1000); // Set OTP expiry to 5 minutes from now
 
         await Otp.createOtp(userId, code, expiry);
         await sendOtp(userId, code); // Implement your OTP sending logic
 
-        return { message: 'OTP sent successfully' };
+            return { success: true, message: 'OTP sent successfully' };
+        } catch (error) {
+            return {
+                success: false, message: 'Internal Server Error'
+            };
+        }
     }
 
     static async verifyOtp(userId, code) {
