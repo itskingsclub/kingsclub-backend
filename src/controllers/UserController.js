@@ -13,7 +13,7 @@ class UserController {
 
             // User exists
             if (rows.length > 0) {
-                const sendOtp = await OtpService.sendOtp(rows[0]?.id);
+                const sendOtp = await OtpService.sendOtp(rows[0]?.mobile_number);
                 if (sendOtp?.success) {
                     res.json({ success: true, message: "User already exists, OTP sent successfully" })
                 }
@@ -30,7 +30,7 @@ class UserController {
                 );
                 const sendOtp = await OtpService.sendOtp(result.insertId);
                 if (sendOtp?.success) {
-                    res.json({ success: true, message: "OTP sent successfully" })
+                    res.json({ success: true, message: "User created, OTP sent successfully" })
                 }
                 else {
                     res.status(500).json({

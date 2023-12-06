@@ -4,11 +4,11 @@ const OtpController = require('../controllers/OtpController');
 const router = express.Router();
 
 // Route for sending OTP
-router.post('/send-otp/:userId', async (req, res) => {
-    const { userId } = req.params;
+router.post('/send-otp/', async (req, res) => {
+    const { mobile_number } = req.body;
 
     try {
-        const result = await OtpController.sendOtp(userId);
+        const result = await OtpController.sendOtp(mobile_number);
         res.json(result);
     } catch (error) {
         console.error(error);
