@@ -5,7 +5,8 @@ const router = express.Router();
 
 // Route for sending OTP
 router.post('/send-otp', OtpController.createOtp);
-router.post('/send-otp', OtpController.createOtp);
+router.post('/log-in', OtpController.createOtp);
+router.post('/verify-otp', OtpController.verifyOtp);
 
 // router.post('/send-otp/', async (req, res) => {
 //     const { mobile_number } = req.body;
@@ -19,18 +20,18 @@ router.post('/send-otp', OtpController.createOtp);
 // });
 
 // Route for verifying OTP
-router.post('/verify-otp/:userId', async (req, res) => {
-    const { userId } = req.params;
-    const { otp } = req.body;
+// router.post('/verify-otp/:userId', async (req, res) => {
+//     const { userId } = req.params;
+//     const { otp } = req.body;
 
-    try {
-        const result = await OtpController.verifyOtp(userId, otp);
-        res.json(result);
-    } catch (error) {
-        console.error(error.message);
-        res.status(401).send('Invalid OTP');
-    }
-});
+//     try {
+//         const result = await OtpController.verifyOtp(userId, otp);
+//         res.json(result);
+//     } catch (error) {
+//         console.error(error.message);
+//         res.status(401).send('Invalid OTP');
+//     }
+// });
 
 // Route for resending OTP
 router.post('/resend-otp/:userId', async (req, res) => {

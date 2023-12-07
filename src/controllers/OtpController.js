@@ -27,9 +27,7 @@ class OtpController {
                             code: otp[0]?.code,
                         },
                     });
-
                 } else {
-
                     const code = generateOtp(); // Implement your OTP generation logic
                     const expiry = new Date(Date.now() + 5 * 60 * 1000); // Set OTP expiry to 5 minutes from now
 
@@ -46,8 +44,7 @@ class OtpController {
                         },
                     });
                 }
-            }
-            else {
+            } else {
                 res.status(404).json({
                     success: false,
                     message: "User not found",
@@ -85,10 +82,9 @@ class OtpController {
                         message: "OTP sent successfully",
                         data: {
                             code: otp[0]?.code,
-                        }
-                    }
+                        },
+                    };
                 } else {
-
                     const code = generateOtp(); // Implement your OTP generation logic
                     const expiry = new Date(Date.now() + 5 * 60 * 1000); // Set OTP expiry to 5 minutes from now
 
@@ -104,20 +100,19 @@ class OtpController {
                         data: {
                             code: code,
                         },
-                    }
+                  };
                 }
-            }
-            else {
+            } else {
                 return {
                     success: false,
                     message: "User not found",
-                }
+                };
             }
         } catch (error) {
             return {
                 success: false,
                 message: "Internal Server Error",
-            }
+            };
         }
     }
 
@@ -146,15 +141,69 @@ class OtpController {
         }
     }
 
-    static async verifyOtp(mobile_number, code) {
-        const otpRecord = await Otp.getOtp(mobile_number);
+    // verify
+    static async verifyOtp(req, res) {
+        const { mobile_number, code } = req.body;
 
-        if (otpRecord && otpRecord.code === code) {
-            // Clear OTP after successful verification
-            await Otp.clearOtp(mobile_number);
-            return { message: "OTP verified successfully" };
-        } else {
-            throw new Error("Invalid OTP");
+        try {
+            const [user] = await db.execute(
+                "SELECT * FROM users WHERE mobile_number = ?",
+                [mobile_number]
+            );
+
+            // User Found
+            if (user.length > 0) {
+                const [otp] = await db.execute(
+                    "SELECT * FROM otp WHERE mobile_number = ?",
+                    [mobile_number]
+                );
+
+                // OTP Exists
+                if (otp.length > 0) {
+                    const { expiry } = otp[0];
+                    const isExpired = new Date(Date.now()) > expiry;
+
+                    if (isExpired || code !== otp[0]?.code) {
+                        res.status(401).json({
+                            success: false,
+                            message: "Invalid OTP",
+                        });
+                    } else {
+                        const [result] = await db.execute(
+                            "DELETE FROM otp WHERE mobile_number=?",
+                            [mobile_number]
+                        );
+
+                        if (result.affectedRows > 0) {
+                            res.json({
+                                success: true,
+                                message: "OTP verified successfully",
+                                data: user[0],
+                            });
+                        } else {
+                            res.status(500).json({
+                                success: false,
+                                message: "Internal Server Error",
+                            });
+                        }
+                    }
+                } else {
+                    res.status(401).json({
+                        success: false,
+                        message: "Invalid OTP",
+                    });
+                }
+            } else {
+                res.status(404).json({
+                    success: false,
+                    message: "User not found",
+                });
+            }
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: "Internal Server Error",
+            });
         }
     }
 

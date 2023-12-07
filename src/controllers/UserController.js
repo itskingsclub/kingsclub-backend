@@ -21,8 +21,7 @@ class UserController {
                     message: "User already exists, OTP sent successfully",
                     data: sendOtp?.data,
                 });
-                }
-                else {
+                } else {
                     res.status(500).json({
                         success: false,
                         message: "Internal Server Error",
@@ -88,23 +87,24 @@ class UserController {
 
     static async getUser(mobile_number) {
         try {
-            const [rows] = await db.execute("SELECT * FROM users WHERE mobile_number = ?", [
-                mobile_number,
-            ]);
+            const [rows] = await db.execute(
+                "SELECT * FROM users WHERE mobile_number = ?",
+                [mobile_number]
+            );
 
             if (rows.length > 0) {
                 res.json(rows[0]);
                 return {
                     success: false,
                     message: "User found",
-                    data: rows[0]
+                    data: rows[0],
                 };
             } else {
                 res.status(404).send("User not found");
                 return {
                     success: true,
                     message: "User not found",
-                    data: rows[0]
+                    data: rows[0],
                 };
             }
         } catch (error) {
