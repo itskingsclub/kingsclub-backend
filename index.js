@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 app.use('/users', userRoutes);
-app.use('/otp', otpRoutes);
+app.use('/auth', otpRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

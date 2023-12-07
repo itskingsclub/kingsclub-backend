@@ -22,13 +22,19 @@ class UserController {
                     data: sendOtp?.data,
                 });
                 }
+                else {
+                    res.status(500).json({
+                        success: false,
+                        message: "Internal Server Error",
+                    });
+                }
             } else {
                 const [result] = await db.execute(
                     "INSERT INTO users (user_name, email, password, mobile_number) VALUES (?, ?, ?, ?)",
                     [user_name, email, password, mobile_number]
                 );
 
-                    const sendOtp = await OtpService.sendOtp(mobile_number);
+                const sendOtp = await OtpService.sendOtp(req, res);
 
                 if (sendOtp?.success) {
                     res.json({
@@ -44,7 +50,10 @@ class UserController {
                 }
             }
         } catch (error) {
-            res.status(500).send("Internal Server Error");
+            res.status(500).json({
+                success: false,
+                message: "Internal Server Error",
+            });
         }
     }
 
@@ -57,13 +66,23 @@ class UserController {
             ]);
 
             if (rows.length > 0) {
-                res.json(rows[0]);
+                res.json({
+                    success: true,
+                    message: "User found",
+                    data: rows[0],
+                });
             } else {
-                res.status(404).send("User not found");
+                res.status(404).json({
+                    success: false,
+                    message: "User not found",
+                });
             }
         } catch (error) {
             console.error(error);
-            res.status(500).send("Internal Server Error");
+            res.status(500).json({
+                success: false,
+                message: "Internal Server Error",
+            });
         }
     }
 
@@ -90,38 +109,56 @@ class UserController {
             }
         } catch (error) {
             console.error(error);
-            res.status(500).send("Internal Server Error");
+            res.status(500).json({
+                success: false,
+                message: "Internal Server Error",
+            });
         }
     }
 
   static async getAllUsers(req, res) {
     try {
         const [rows] = await db.execute("SELECT * FROM users");
-        res.json(rows);
+        res.json({
+            success: true,
+            message: "User fetched successfully",
+            data: rows,
+        });
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+        });
     }
   }
 
     static async updateUser(req, res) {
-        const { userId } = req.params;
         const { user_name, email, password, mobile_number } = req.body;
 
         try {
             const [result] = await db.execute(
-                "UPDATE users SET user_name=?, email=?, password=?, mobile_number=? WHERE id=?",
-                [user_name, email, password, mobile_number, userId]
+                "UPDATE users SET user_name=?, email=?, password=?, mobile_number=? WHERE mobile_number=?",
+                [user_name, email, password, mobile_number, mobile_number]
             );
 
             if (result.affectedRows > 0) {
-                res.send("User updated successfully");
+                res.json({
+                    success: true,
+                    message: "User updated successfully",
+                });
             } else {
-                res.status(404).send("User not found");
+                res.status(404).json({
+                    success: false,
+                    message: "User not found",
+                });
             }
     } catch (error) {
       console.error(error);
-            res.status(500).send("Internal Server Error");
+            res.status(500).json({
+                success: false,
+                message: "Internal Server Error",
+            });
     }
   }
 
@@ -134,13 +171,22 @@ class UserController {
             ]);
 
             if (result.affectedRows > 0) {
-                res.send("User deleted successfully");
+                res.json({
+                    success: true,
+                    message: "User deleted successfully",
+                });
             } else {
-                res.status(404).send("User not found");
+                res.status(404).json({
+                    success: false,
+                    message: "User not found",
+                });
             }
         } catch (error) {
             console.error(error);
-            res.status(500).send("Internal Server Error");
+            res.status(500).json({
+                success: false,
+                message: "Internal Server Error",
+            });
         }
     }
 }

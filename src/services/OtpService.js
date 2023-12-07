@@ -1,10 +1,10 @@
 const OtpController = require('../controllers/OtpController');
 
 class OtpService {
-    static async sendOtp(mobile_number) {
+    static async sendOtp(req, res) {
         // Send OTP
-        const res = await OtpController.sendOTP(mobile_number);
-        return res;
+        const response = await OtpController.sendOTP(req, res);
+        return response;
     }
 
     static async getOtp(mobile_number) {

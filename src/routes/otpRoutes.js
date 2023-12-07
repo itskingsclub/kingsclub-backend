@@ -5,6 +5,7 @@ const router = express.Router();
 
 // Route for sending OTP
 router.post('/send-otp', OtpController.createOtp);
+router.post('/send-otp', OtpController.createOtp);
 
 // router.post('/send-otp/', async (req, res) => {
 //     const { mobile_number } = req.body;

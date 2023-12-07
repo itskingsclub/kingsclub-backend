@@ -62,7 +62,8 @@ class OtpController {
     }
 
     // send
-    static async sendOTP(mobile_number) {
+    static async sendOTP(req, res) {
+        const { mobile_number } = req.body;
 
         try {
             const [user] = await db.execute(
