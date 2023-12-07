@@ -27,6 +27,7 @@ class OtpController {
                             code: otp[0]?.code,
                         },
                     });
+
                 } else {
 
                     const code = generateOtp(); // Implement your OTP generation logic
@@ -57,6 +58,65 @@ class OtpController {
                 success: false,
                 message: "Internal Server Error",
             });
+        }
+    }
+
+    // send
+    static async sendOTP(mobile_number) {
+
+        try {
+            const [user] = await db.execute(
+                "SELECT * FROM users WHERE mobile_number = ?",
+                [mobile_number]
+            );
+
+            // User Found
+            if (user.length > 0) {
+                const [otp] = await db.execute(
+                    "SELECT * FROM otp WHERE mobile_number = ?",
+                    [mobile_number]
+                );
+
+                // OTP Exists
+                if (otp.length > 0) {
+                    return {
+                        success: true,
+                        message: "OTP sent successfully",
+                        data: {
+                            code: otp[0]?.code,
+                        }
+                    }
+                } else {
+
+                    const code = generateOtp(); // Implement your OTP generation logic
+                    const expiry = new Date(Date.now() + 5 * 60 * 1000); // Set OTP expiry to 5 minutes from now
+
+                    const [result] = await db.execute(
+                        "INSERT INTO otp (mobile_number, code, expiry) VALUES (?, ?, ?)",
+                        [mobile_number, code, expiry]
+                    );
+
+                    await sendOtp(mobile_number, code); // Implement your OTP sending logic
+                    return {
+                        success: true,
+                        message: "OTP sent successfully",
+                        data: {
+                            code: code,
+                        },
+                    }
+                }
+            }
+            else {
+                return {
+                    success: false,
+                    message: "User not found",
+                }
+            }
+        } catch (error) {
+            return {
+                success: false,
+                message: "Internal Server Error",
+            }
         }
     }
 

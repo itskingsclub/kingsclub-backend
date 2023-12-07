@@ -13,11 +13,15 @@ class UserController {
 
             // User exists
             if (rows.length > 0) {
+                const sendOtp = await OtpService.sendOtp(req, res);
+
+                if (sendOtp?.success) {
                 res.json({
                     success: true,
                     message: "User already exists, OTP sent successfully",
                     data: sendOtp?.data,
                 });
+                }
             } else {
                 const [result] = await db.execute(
                     "INSERT INTO users (user_name, email, password, mobile_number) VALUES (?, ?, ?, ?)",
@@ -68,8 +72,6 @@ class UserController {
             const [rows] = await db.execute("SELECT * FROM users WHERE mobile_number = ?", [
                 mobile_number,
             ]);
-
-            console.log("PV rows", rows)
 
             if (rows.length > 0) {
                 res.json(rows[0]);
