@@ -1,21 +1,52 @@
+# Kings API Documentation
 
-## Log in
+1. Register User
+2. Log In
+3. Verify OTP
 
-1. check mobile number and validate
-2. save user to db
-2. genrate otp and save to db
-3. sent opt to mobile number
-4. verify otp
-5. genrate token
-6. save token to db
-7. return token and login
+Lets see then in action...
 
-## Register
+01.  ### Register User
 
-1. check mobile number
-2. genrate otp and save to db
-3. sent opt to mobile number
-4. verify otp
-5. genrate token
-6. save token to db
-7. return token and login
+        https://api-kings.vercel.app/users/register
+
+        ```javascript
+            {
+                "user_name": "Test User",
+                "email": "test@gmail.com",
+                "password": "1234567890",
+                "mobile_number":"1111111111"
+            }
+        ```
+
+        **[⬆ Back to Top](#table-of-contents)**
+
+02.  ### Log In
+
+        https://api-kings.vercel.app/auth/log-in/
+
+        ```javascript
+            {
+                "mobile_number":"1111111111"
+            }
+        ```
+
+        **[⬆ Back to Top](#table-of-contents)**
+
+03.  ### Verify OTP
+
+        https://api-kings.vercel.app/auth/verify-otp/
+
+        ```javascript
+            {
+                "mobile_number":"1111111111",
+                "code":"9267"
+            }
+        ```
+
+        **[⬆ Back to Top](#table-of-contents)**
+
+
+## Thank You
+
+Thanks for reading 😊
