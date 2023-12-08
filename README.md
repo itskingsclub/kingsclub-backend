@@ -19,7 +19,7 @@ Lets see then in action...
             }
         ```
 
-        **[⬆ Back to Top](#table-of-contents)**
+        **[⬆ Back to Top](#kings-api-documentation)**
 
 02.  ### Log In
 
@@ -31,7 +31,7 @@ Lets see then in action...
             }
         ```
 
-        **[⬆ Back to Top](#table-of-contents)**
+        **[⬆ Back to Top](#kings-api-documentation)**
 
 03.  ### Verify OTP
 
@@ -44,7 +44,7 @@ Lets see then in action...
             }
         ```
 
-        **[⬆ Back to Top](#table-of-contents)**
+        **[⬆ Back to Top](#kings-api-documentation)**
 
 
 ## Thank You
