@@ -24,23 +24,23 @@ class OtpController {
                         success: true,
                         message: "OTP sent successfully",
                         data: {
-                            code: otp[0]?.code,
+                            pin: otp[0]?.pin,
                         },
                     });
                 } else {
-                    const code = generateOtp(); // Implement your OTP generation logic
+                    const pin = generateOtp(); // Implement your OTP generation logic
                     const expiry = new Date(Date.now() + 5 * 60 * 1000); // Set OTP expiry to 5 minutes from now
 
                     const [result] = await db.execute(
-                        "INSERT INTO otp (mobile, code, expiry) VALUES (?, ?, ?)",
-                        [mobile, code, expiry]
+                        "INSERT INTO otp (mobile, pin, expiry) VALUES (?, ?, ?)",
+                        [mobile, pin, expiry]
                     );
-                    await sendOtp(mobile, code); // Implement your OTP sending logic
+                    await sendOtp(mobile, pin); // Implement your OTP sending logic
                     res.json({
                         success: true,
                         message: "OTP sent successfully",
                         data: {
-                            code: code,
+                            pin: pin,
                         },
                     });
                 }
@@ -81,24 +81,24 @@ class OtpController {
                         success: true,
                         message: "OTP sent successfully",
                         data: {
-                            code: otp[0]?.code,
+                            pin: otp[0]?.pin,
                         },
                     };
                 } else {
-                    const code = generateOtp(); // Implement your OTP generation logic
+                    const pin = generateOtp(); // Implement your OTP generation logic
                     const expiry = new Date(Date.now() + 5 * 60 * 1000); // Set OTP expiry to 5 minutes from now
 
                     const [result] = await db.execute(
-                        "INSERT INTO otp (mobile, code, expiry) VALUES (?, ?, ?)",
-                        [mobile, code, expiry]
+                        "INSERT INTO otp (mobile, pin, expiry) VALUES (?, ?, ?)",
+                        [mobile, pin, expiry]
                     );
 
-                    await sendOtp(mobile, code); // Implement your OTP sending logic
+                    await sendOtp(mobile, pin); // Implement your OTP sending logic
                     return {
                         success: true,
                         message: "OTP sent successfully",
                         data: {
-                            code: code,
+                            pin: pin,
                         },
                   };
                 }
@@ -143,7 +143,7 @@ class OtpController {
 
     // verify
     static async verifyOtp(req, res) {
-        const { mobile, code } = req.body;
+        const { mobile, pin } = req.body;
 
         try {
             const [user] = await db.execute(
@@ -163,7 +163,7 @@ class OtpController {
                     const { expiry } = otp[0];
                     const isExpired = new Date(Date.now()) > expiry;
 
-                    if (isExpired || code !== otp[0]?.code) {
+                    if (isExpired || pin !== otp[0]?.pin) {
                         res.status(401).json({
                             success: false,
                             message: "Invalid OTP",
@@ -214,11 +214,11 @@ class OtpController {
             await Otp.clearOtp(userId);
         }
 
-        const code = generateOtp(); // Implement your OTP generation logic
+        const pin = generateOtp(); // Implement your OTP generation logic
         const expiry = new Date(Date.now() + 5 * 60 * 1000); // Set OTP expiry to 5 minutes from now
 
-        await Otp.createOtp(userId, code, expiry);
-        await sendOtp(userId, code); // Implement your OTP sending logic
+        await Otp.createOtp(userId, pin, expiry);
+        await sendOtp(userId, pin); // Implement your OTP sending logic
 
         return { message: "OTP resent successfully" };
     }

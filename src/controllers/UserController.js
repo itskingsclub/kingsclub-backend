@@ -6,9 +6,6 @@ class UserController {
         const { name, email = null, mobile } = req.body;
 
         try {
-
-            console.log("PV 1", req.body);
-
             const [rows] = await db.execute(
                 "SELECT * FROM users WHERE mobile = ?",
                 [mobile]
@@ -17,8 +14,6 @@ class UserController {
             // User exists
             if (rows.length > 0) {
                 const sendOtp = await OtpService.sendOtp(req, res);
-
-                console.log("PV 2", sendOtp);
 
                 if (sendOtp?.success) {
                 res.json({
@@ -34,14 +29,10 @@ class UserController {
                 }
             } else {
 
-                console.log("PV 3", req.body);
-
                 const [result] = await db.execute(
                     "INSERT INTO users (name, email, mobile) VALUES (?, ?, ?)",
                     [name, email, mobile]
                 );
-
-                console.log("PV 4", result);
 
                 const sendOtp = await OtpService.sendOtp(req, res);
 
