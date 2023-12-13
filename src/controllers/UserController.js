@@ -3,17 +3,22 @@ const OtpService = require("../services/OtpService");
 
 class UserController {
     static async createUser(req, res) {
-        const { user_name, email, password, mobile_number } = req.body;
+        const { name, email = null, mobile } = req.body;
 
         try {
+
+            console.log("PV 1", req.body);
+
             const [rows] = await db.execute(
-                "SELECT * FROM users WHERE mobile_number = ?",
-                [mobile_number]
+                "SELECT * FROM users WHERE mobile = ?",
+                [mobile]
             );
 
             // User exists
             if (rows.length > 0) {
                 const sendOtp = await OtpService.sendOtp(req, res);
+
+                console.log("PV 2", sendOtp);
 
                 if (sendOtp?.success) {
                 res.json({
@@ -28,10 +33,15 @@ class UserController {
                     });
                 }
             } else {
+
+                console.log("PV 3", req.body);
+
                 const [result] = await db.execute(
-                    "INSERT INTO users (user_name, email, password, mobile_number) VALUES (?, ?, ?, ?)",
-                    [user_name, email, password, mobile_number]
+                    "INSERT INTO users (name, email, mobile) VALUES (?, ?, ?)",
+                    [name, email, mobile]
                 );
+
+                console.log("PV 4", result);
 
                 const sendOtp = await OtpService.sendOtp(req, res);
 
@@ -85,11 +95,11 @@ class UserController {
         }
     }
 
-    static async getUser(mobile_number) {
+    static async getUser(mobile) {
         try {
             const [rows] = await db.execute(
-                "SELECT * FROM users WHERE mobile_number = ?",
-                [mobile_number]
+                "SELECT * FROM users WHERE mobile = ?",
+                [mobile]
             );
 
             if (rows.length > 0) {
@@ -134,12 +144,12 @@ class UserController {
   }
 
     static async updateUser(req, res) {
-        const { user_name, email, password, mobile_number } = req.body;
+        const { name, email, mobile } = req.body;
 
         try {
             const [result] = await db.execute(
-                "UPDATE users SET user_name=?, email=?, password=?, mobile_number=? WHERE mobile_number=?",
-                [user_name, email, password, mobile_number, mobile_number]
+                "UPDATE users SET name=?, email=?, mobile=? WHERE mobile=?",
+                [name, email, mobile, mobile]
             );
 
             if (result.affectedRows > 0) {

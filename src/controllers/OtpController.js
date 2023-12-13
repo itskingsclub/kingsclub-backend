@@ -4,18 +4,18 @@ const { generateOtp, sendOtp } = require("../utils/otpUtils");
 
 class OtpController {
     static async createOtp(req, res) {
-        const { mobile_number } = req.body;
+        const { mobile } = req.body;
         try {
             const [user] = await db.execute(
-                "SELECT * FROM users WHERE mobile_number = ?",
-                [mobile_number]
+                "SELECT * FROM users WHERE mobile = ?",
+                [mobile]
             );
 
             // User Found
             if (user.length > 0) {
                 const [otp] = await db.execute(
-                    "SELECT * FROM otp WHERE mobile_number = ?",
-                    [mobile_number]
+                    "SELECT * FROM otp WHERE mobile = ?",
+                    [mobile]
                 );
 
                 // OTP Exists
@@ -32,10 +32,10 @@ class OtpController {
                     const expiry = new Date(Date.now() + 5 * 60 * 1000); // Set OTP expiry to 5 minutes from now
 
                     const [result] = await db.execute(
-                        "INSERT INTO otp (mobile_number, code, expiry) VALUES (?, ?, ?)",
-                        [mobile_number, code, expiry]
+                        "INSERT INTO otp (mobile, code, expiry) VALUES (?, ?, ?)",
+                        [mobile, code, expiry]
                     );
-                    await sendOtp(mobile_number, code); // Implement your OTP sending logic
+                    await sendOtp(mobile, code); // Implement your OTP sending logic
                     res.json({
                         success: true,
                         message: "OTP sent successfully",
@@ -60,19 +60,19 @@ class OtpController {
 
     // send
     static async sendOTP(req, res) {
-        const { mobile_number } = req.body;
+        const { mobile } = req.body;
 
         try {
             const [user] = await db.execute(
-                "SELECT * FROM users WHERE mobile_number = ?",
-                [mobile_number]
+                "SELECT * FROM users WHERE mobile = ?",
+                [mobile]
             );
 
             // User Found
             if (user.length > 0) {
                 const [otp] = await db.execute(
-                    "SELECT * FROM otp WHERE mobile_number = ?",
-                    [mobile_number]
+                    "SELECT * FROM otp WHERE mobile = ?",
+                    [mobile]
                 );
 
                 // OTP Exists
@@ -89,11 +89,11 @@ class OtpController {
                     const expiry = new Date(Date.now() + 5 * 60 * 1000); // Set OTP expiry to 5 minutes from now
 
                     const [result] = await db.execute(
-                        "INSERT INTO otp (mobile_number, code, expiry) VALUES (?, ?, ?)",
-                        [mobile_number, code, expiry]
+                        "INSERT INTO otp (mobile, code, expiry) VALUES (?, ?, ?)",
+                        [mobile, code, expiry]
                     );
 
-                    await sendOtp(mobile_number, code); // Implement your OTP sending logic
+                    await sendOtp(mobile, code); // Implement your OTP sending logic
                     return {
                         success: true,
                         message: "OTP sent successfully",
@@ -116,11 +116,11 @@ class OtpController {
         }
     }
 
-    static async getOtp(mobile_number) {
+    static async getOtp(mobile) {
         try {
             const [rows] = await db.execute(
-                "SELECT * FROM otp WHERE mobile_number = ?",
-                [mobile_number]
+                "SELECT * FROM otp WHERE mobile = ?",
+                [mobile]
             );
 
             if (rows.length > 0) {
@@ -143,19 +143,19 @@ class OtpController {
 
     // verify
     static async verifyOtp(req, res) {
-        const { mobile_number, code } = req.body;
+        const { mobile, code } = req.body;
 
         try {
             const [user] = await db.execute(
-                "SELECT * FROM users WHERE mobile_number = ?",
-                [mobile_number]
+                "SELECT * FROM users WHERE mobile = ?",
+                [mobile]
             );
 
             // User Found
             if (user.length > 0) {
                 const [otp] = await db.execute(
-                    "SELECT * FROM otp WHERE mobile_number = ?",
-                    [mobile_number]
+                    "SELECT * FROM otp WHERE mobile = ?",
+                    [mobile]
                 );
 
                 // OTP Exists
@@ -170,8 +170,8 @@ class OtpController {
                         });
                     } else {
                         const [result] = await db.execute(
-                            "DELETE FROM otp WHERE mobile_number=?",
-                            [mobile_number]
+                            "DELETE FROM otp WHERE mobile=?",
+                            [mobile]
                         );
 
                         if (result.affectedRows > 0) {

@@ -7,9 +7,9 @@ class OtpService {
         return response;
     }
 
-    static async getOtp(mobile_number) {
+    static async getOtp(mobile) {
         // Send OTP
-        const res = await OtpController.getOtp(mobile_number);
+        const res = await OtpController.getOtp(mobile);
         return res;
     }
 }
