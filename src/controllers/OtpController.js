@@ -17,6 +17,7 @@ class OtpController {
                     "SELECT * FROM otp WHERE mobile = ?",
                     [mobile]
                 );
+                const { id: user_id } = user[0];
 
                 // OTP Exists
                 if (otp.length > 0) {
@@ -30,10 +31,11 @@ class OtpController {
                 } else {
                     const pin = generateOtp(); // Implement your OTP generation logic
                     const expiry = new Date(Date.now() + 5 * 60 * 1000); // Set OTP expiry to 5 minutes from now
+                    const created_time = new Date(Date.now());
 
                     const [result] = await db.execute(
-                        "INSERT INTO otp (mobile, pin, expiry) VALUES (?, ?, ?)",
-                        [mobile, pin, expiry]
+                        "INSERT INTO otp (user_id, mobile, pin, expiry, created_time) VALUES (?, ?, ?, ?, ?)",
+                        [user_id, mobile, pin, expiry, created_time]
                     );
                     await sendOtp(mobile, pin); // Implement your OTP sending logic
                     res.json({
@@ -74,6 +76,7 @@ class OtpController {
                     "SELECT * FROM otp WHERE mobile = ?",
                     [mobile]
                 );
+                const { id: user_id } = user[0];
 
                 // OTP Exists
                 if (otp.length > 0) {
@@ -87,10 +90,11 @@ class OtpController {
                 } else {
                     const pin = generateOtp(); // Implement your OTP generation logic
                     const expiry = new Date(Date.now() + 5 * 60 * 1000); // Set OTP expiry to 5 minutes from now
+                    const created_time = new Date(Date.now());
 
                     const [result] = await db.execute(
-                        "INSERT INTO otp (mobile, pin, expiry) VALUES (?, ?, ?)",
-                        [mobile, pin, expiry]
+                        "INSERT INTO otp (user_id, mobile, pin, expiry, created_time) VALUES (?, ?, ?, ?, ?)",
+                        [user_id, mobile, pin, expiry, created_time]
                     );
 
                     await sendOtp(mobile, pin); // Implement your OTP sending logic

@@ -1,8 +1,8 @@
 const db = require('../config/db');
 
 class Otp {
-    static async createOtp(mobile, pin, expiry) {
-        const [result] = await db.execute('INSERT INTO otp (mobile, pin, expiry) VALUES (?, ?, ?)', [mobile, pin, expiry]);
+    static async createOtp(user_id, mobile, pin, expiry, created_time) {
+        const [result] = await db.execute('INSERT INTO otp (user_id, mobile, pin, expiry, created_time) VALUES (?, ?, ?, ?, ?)', [user_id, mobile, pin, expiry, created_time]);
         return result.insertId;
     }
 
