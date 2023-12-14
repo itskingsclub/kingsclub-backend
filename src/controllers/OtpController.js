@@ -163,30 +163,53 @@ class OtpController {
                     const { expiry } = otp[0];
                     const isExpired = new Date(Date.now()) > expiry;
 
-                    if (isExpired || pin !== otp[0]?.pin) {
+                    if (pin == otp[0]?.pin && mobile === otp[0]?.mobile) {
+
+                        // OTP Exists
+                        if (isExpired) {
+                            const [result] = await db.execute(
+                                "DELETE FROM otp WHERE mobile=?",
+                                [mobile]
+                            );
+                            if (result.affectedRows > 0) {
+                                res.status(401).json({
+                                    success: false,
+                                    message: "OTP has expired, Try again",
+                                });
+                            } else {
+                                res.status(500).json({
+                                    success: false,
+                                    message: "Internal Server Error",
+                                });
+                            }
+                        } else {
+                            const [result] = await db.execute(
+                                "DELETE FROM otp WHERE mobile=?",
+                                [mobile]
+                            );
+
+                            if (result.affectedRows > 0) {
+                                res.json({
+                                    success: true,
+                                    message: "OTP verified successfully",
+                                    data: user[0],
+                                });
+                            } else {
+                                res.status(500).json({
+                                    success: false,
+                                    message: "Internal Server Error",
+                                });
+                            }
+                        }
+                    }
+
+                    else {
                         res.status(401).json({
                             success: false,
                             message: "Invalid OTP",
                         });
-                    } else {
-                        const [result] = await db.execute(
-                            "DELETE FROM otp WHERE mobile=?",
-                            [mobile]
-                        );
-
-                        if (result.affectedRows > 0) {
-                            res.json({
-                                success: true,
-                                message: "OTP verified successfully",
-                                data: user[0],
-                            });
-                        } else {
-                            res.status(500).json({
-                                success: false,
-                                message: "Internal Server Error",
-                            });
-                        }
                     }
+
                 } else {
                     res.status(401).json({
                         success: false,
