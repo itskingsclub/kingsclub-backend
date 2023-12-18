@@ -3,7 +3,22 @@ const OtpService = require("../services/OtpService");
 
 class UserController {
     static async createUser(req, res) {
-        const { name, email = null, mobile } = req.body;
+        const time = new Date(Date.now());
+        const { name,
+            email = null,
+            mobile,
+            referral_code = null,
+            invite_code = null,
+            admin = false,
+            block = false,
+            token = null,
+            total_coin = 500,
+            friend_list = null,
+            challenges = null,
+            depost_history = null,
+            withdral_history = null,
+            created_time = time,
+            updated_time = time } = req.body;
 
         try {
             const [rows] = await db.execute(
@@ -16,11 +31,11 @@ class UserController {
                 const sendOtp = await OtpService.sendOtp(req, res);
 
                 if (sendOtp?.success) {
-                res.json({
-                    success: true,
-                    message: "User already exists, OTP sent successfully",
-                    data: sendOtp?.data,
-                });
+                    res.json({
+                        success: true,
+                        message: "User already exists, OTP sent successfully",
+                        data: sendOtp?.data,
+                    });
                 } else {
                     res.status(500).json({
                         success: false,
@@ -30,8 +45,8 @@ class UserController {
             } else {
 
                 const [result] = await db.execute(
-                    "INSERT INTO users (name, email, mobile) VALUES (?, ?, ?)",
-                    [name, email, mobile]
+                    "INSERT INTO users ( name, email, mobile, referral_code, invite_code, admin, block, token, total_coin, friend_list, challenges, depost_history, withdral_history,created_time, updated_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    [name, email, mobile, referral_code, invite_code, admin, block, token, total_coin, friend_list, challenges, depost_history, withdral_history, created_time, updated_time]
                 );
 
                 const sendOtp = await OtpService.sendOtp(req, res);
@@ -117,30 +132,43 @@ class UserController {
         }
     }
 
-  static async getAllUsers(req, res) {
-    try {
-        const [rows] = await db.execute("SELECT * FROM users");
-        res.json({
-            success: true,
-            message: "User fetched successfully",
-            data: rows,
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            success: false,
-            message: "Internal Server Error",
-        });
+    static async getAllUsers(req, res) {
+        try {
+            const [rows] = await db.execute("SELECT * FROM users");
+            res.json({
+                success: true,
+                message: "User fetched successfully",
+                data: rows,
+            });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({
+                success: false,
+                message: "Internal Server Error",
+            });
+        }
     }
-  }
 
     static async updateUser(req, res) {
-        const { name, email, mobile } = req.body;
+        const time = new Date(Date.now());
+        const { name,
+            email = null,
+            mobile,
+            referral_code = null,
+            admin = false,
+            block = false,
+            token = null,
+            total_coin = null,
+            friend_list = null,
+            challenges = null,
+            depost_history = null,
+            withdral_history = null,
+            updated_time = time } = req.body;
 
         try {
             const [result] = await db.execute(
-                "UPDATE users SET name=?, email=?, mobile=? WHERE mobile=?",
-                [name, email, mobile, mobile]
+                "UPDATE users SET name=?, email=?, mobile=?, referral_code=?, admin=?, block=?, token=?, total_coin=?, friend_list=?, challenges=?, depost_history=?, withdral_history=?, updated_time=? WHERE mobile=?",
+                [name, email, mobile, referral_code, admin, block, token, total_coin, friend_list, challenges, depost_history, withdral_history, updated_time, mobile]
             );
 
             if (result.affectedRows > 0) {
@@ -154,14 +182,14 @@ class UserController {
                     message: "User not found",
                 });
             }
-    } catch (error) {
-      console.error(error);
+        } catch (error) {
+            console.error(error);
             res.status(500).json({
                 success: false,
                 message: "Internal Server Error",
             });
+        }
     }
-  }
 
     static async deleteUser(req, res) {
         const { userId } = req.params;
