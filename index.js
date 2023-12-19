@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 3000;
 app.use(bodyParser.json());
 app.use('/users', userRoutes);
 app.use('/auth', otpRoutes);
-app.use('/challenge', otpRoutes);
+app.use('/challenge', challengeRoutes);
 
 
 app.listen(PORT, () => {

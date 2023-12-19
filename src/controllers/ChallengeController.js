@@ -3,10 +3,12 @@ const Challenge = require('../models/Challenge');
 
 class ChallengeController {
     static async createChallenge(req, res) {
-        const { creator, challenge_status, amount, expiry_time, updated_by } = req.body;
+        const { creator, amount } = req.body;
 
         try {
-            const challengeId = await Challenge.createChallenge(creator, challenge_status, amount, expiry_time, updated_by);
+            console.log("PV 1", creator, amount)
+            const challengeId = await Challenge.createChallenge(creator, amount);
+
             res.json({
                 success: true,
                 message: 'Challenge created successfully',
