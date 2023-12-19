@@ -1,5 +1,6 @@
 const express = require('express');
 const UserController = require('../controllers/UserController');
+const { verifyToken } = require('../utils/authUtils');
 
 const router = express.Router();
 
@@ -13,7 +14,7 @@ router.get('/all', UserController.getAllUsers);
 router.get('/:userId', UserController.getUserById);
 
 // Update a user by ID
-router.put('/update', UserController.updateUser);
+router.put('/update', verifyToken, UserController.updateUser);
 
 // Delete a user by ID
 router.delete('/delete/:userId', UserController.deleteUser);

@@ -1,17 +1,17 @@
 const db = require("../config/db");
 const OtpService = require("../services/OtpService");
+const { generateInviteCode } = require('../utils/numberUtils');
 
 class UserController {
     static async createUser(req, res) {
         const time = new Date(Date.now());
+        const invite_code = generateInviteCode();
         const { name,
             email = null,
             mobile,
             referral_code = null,
-            invite_code = null,
             admin = false,
             block = false,
-            token = null,
             total_coin = 500,
             friend_list = null,
             challenges = null,
@@ -45,8 +45,8 @@ class UserController {
             } else {
 
                 const [result] = await db.execute(
-                    "INSERT INTO users ( name, email, mobile, referral_code, invite_code, admin, block, token, total_coin, friend_list, challenges, depost_history, withdral_history,created_time, updated_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                    [name, email, mobile, referral_code, invite_code, admin, block, token, total_coin, friend_list, challenges, depost_history, withdral_history, created_time, updated_time]
+                    "INSERT INTO users ( name, email, mobile, referral_code, invite_code, admin, block, total_coin, friend_list, challenges, depost_history, withdral_history,created_time, updated_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    [name, email, mobile, referral_code, invite_code, admin, block, total_coin, friend_list, challenges, depost_history, withdral_history, created_time, updated_time]
                 );
 
                 const sendOtp = await OtpService.sendOtp(req, res);
@@ -157,7 +157,6 @@ class UserController {
             referral_code = null,
             admin = false,
             block = false,
-            token = null,
             total_coin = null,
             friend_list = null,
             challenges = null,
@@ -167,8 +166,8 @@ class UserController {
 
         try {
             const [result] = await db.execute(
-                "UPDATE users SET name=?, email=?, mobile=?, referral_code=?, admin=?, block=?, token=?, total_coin=?, friend_list=?, challenges=?, depost_history=?, withdral_history=?, updated_time=? WHERE mobile=?",
-                [name, email, mobile, referral_code, admin, block, token, total_coin, friend_list, challenges, depost_history, withdral_history, updated_time, mobile]
+                "UPDATE users SET name=?, email=?, mobile=?, referral_code=?, admin=?, block=?,total_coin=?, friend_list=?, challenges=?, depost_history=?, withdral_history=?, updated_time=? WHERE mobile=?",
+                [name, email, mobile, referral_code, admin, block, total_coin, friend_list, challenges, depost_history, withdral_history, updated_time, mobile]
             );
 
             if (result.affectedRows > 0) {
