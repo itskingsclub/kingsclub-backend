@@ -12,10 +12,10 @@ Lets see then in action...
 
         ```javascript
             {
-                "user_name": "Test User",
-                "email": "test@gmail.com",
-                "password": "1234567890",
-                "mobile_number":"1111111111"
+                "name": "Test User",
+                "mobile": "9000000000",
+                "email":"test@gmail.com",
+                "referral_code":"FG6235"
             }
         ```
 
@@ -27,7 +27,7 @@ Lets see then in action...
 
         ```javascript
             {
-                "mobile_number":"1111111111"
+                "mobile_number":"9000000000"
             }
         ```
 
@@ -39,13 +39,41 @@ Lets see then in action...
 
         ```javascript
             {
-                "mobile_number":"1111111111",
-                "code":"9267"
+                "mobile_number":"9000000000",
+                "pin":"9267"
             }
         ```
 
         **[⬆ Back to Top](#kings-api-documentation)**
 
+04.  ### Create Challenge
+
+        https://api-kings.vercel.app/challenge/create
+
+        ```javascript
+            {
+                "amount": 100,
+                "creator": 1
+            }
+        ```
+
+        **[⬆ Back to Top](#kings-api-documentation)**
+
+05.  ### Update Challenge
+
+        https://api-kings.vercel.app/challenge/update
+
+        ```javascript
+            {
+                "id": 1,
+                "joiner": "1111111117",
+                "challenge_status": "Waiting",
+                "updated_by": "1111111117",
+                "room_code":"12345678"
+            }
+        ```
+
+        **[⬆ Back to Top](#kings-api-documentation)**
 
 ## Thank You
 
