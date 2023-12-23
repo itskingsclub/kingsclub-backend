@@ -152,22 +152,71 @@ class UserController {
     static async updateUser(req, res) {
         const time = new Date(Date.now());
         const { name,
-            email = null,
+            email,
             mobile,
-            referral_code = null,
-            admin = false,
-            block = false,
-            total_coin = null,
-            friend_list = null,
-            challenges = null,
-            depost_history = null,
-            withdral_history = null,
-            updated_time = time } = req.body;
+            referral_code,
+            admin,
+            block,
+            total_coin,
+            friend_list,
+            challenges,
+            depost_history,
+            withdral_history } = req.body;
+
+        // Create an array to hold the SET clauses for the fields that are provided
+        const setClauses = [];
+        const values = [];
+
+        // Add each field to the setClauses and values arrays if it is provided
+        if (name) {
+            setClauses.push('name=?');
+            values.push(name);
+        }
+        if (email !== undefined) {
+            setClauses.push('email=?');
+            values.push(email);
+        }
+        if (referral_code !== undefined) {
+            setClauses.push('referral_code=?');
+            values.push(referral_code);
+        }
+        if (admin !== undefined) {
+            setClauses.push('admin=?');
+            values.push(admin);
+        }
+        if (block !== undefined) {
+            setClauses.push('block=?');
+            values.push(block);
+        }
+        if (total_coin !== undefined) {
+            setClauses.push('total_coin=?');
+            values.push(total_coin);
+        }
+        if (friend_list !== undefined) {
+            setClauses.push('friend_list=?');
+            values.push(friend_list);
+        }
+        if (challenges !== undefined) {
+            setClauses.push('challenges=?');
+            values.push(challenges);
+        }
+        if (depost_history !== undefined) {
+            setClauses.push('depost_history=?');
+            values.push(depost_history);
+        }
+        if (withdral_history !== undefined) {
+            setClauses.push('withdral_history=?');
+            values.push(withdral_history);
+        }
+
+        // Join the setClauses array into a comma-separated string for the SET clause in the SQL query
+        const setClause = setClauses.join(', ');
 
         try {
+            values.push(time, mobile); // Add updated_time and mobile to the values array
             const [result] = await db.execute(
-                "UPDATE users SET name=?, email=?, mobile=?, referral_code=?, admin=?, block=?,total_coin=?, friend_list=?, challenges=?, depost_history=?, withdral_history=?, updated_time=? WHERE mobile=?",
-                [name, email, mobile, referral_code, admin, block, total_coin, friend_list, challenges, depost_history, withdral_history, updated_time, mobile]
+                `UPDATE users SET ${setClause}, updated_time=? WHERE mobile=?`,
+                values
             );
 
             if (result.affectedRows > 0) {

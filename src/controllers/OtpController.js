@@ -195,11 +195,6 @@ class OtpController {
 
                             if (result.affectedRows > 0) {
                                 const authToken = generateAuthToken(mobile);
-                                const [result] = await db.execute(
-                                    "UPDATE users SET token=? WHERE mobile=?",
-                                    [authToken, mobile]
-                                );
-
                                 if (result.affectedRows > 0) {
                                     res.json({
                                         success: true,

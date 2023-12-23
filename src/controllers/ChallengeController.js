@@ -6,9 +6,7 @@ class ChallengeController {
         const { creator, amount } = req.body;
 
         try {
-            console.log("PV 1", creator, amount)
             const challengeId = await Challenge.createChallenge(creator, amount);
-
             res.json({
                 success: true,
                 message: 'Challenge created successfully',
@@ -67,11 +65,8 @@ class ChallengeController {
     }
 
     static async updateChallenge(req, res) {
-        const { challengeId } = req.params;
-        const newData = req.body;
-
         try {
-            const success = await Challenge.updateChallenge(challengeId, newData);
+            const success = await Challenge.updateChallenge(req, res);
             if (success) {
                 res.json({
                     success: true,
