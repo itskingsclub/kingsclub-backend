@@ -22,10 +22,41 @@ class Challenge {
     }
 
     static async updateChallenge(req, res) {
-        const { id, joiner, challenge_status, room_code = null, amount = null, admin_approval = null, updated_by } = req.body;
+        const time = new Date(Date.now());
+        const { id, joiner, challenge_status, room_code, admin_approval, updated_by } = req.body;
+
+        // Create an array to hold the SET clauses for the fields that are provided
+        const setClauses = [];
+        const values = [];
+
+        if (joiner) {
+            setClauses.push('joiner=?');
+            values.push(joiner);
+        }
+        if (challenge_status !== undefined) {
+            setClauses.push('challenge_status=?');
+            values.push(challenge_status);
+        }
+        if (room_code !== undefined) {
+            setClauses.push('room_code=?');
+            values.push(room_code);
+        }
+        if (admin_approval !== undefined) {
+            setClauses.push('admin_approval=?');
+            values.push(admin_approval);
+        }
+        if (updated_by !== undefined) {
+            setClauses.push('updated_by=?');
+            values.push(updated_by);
+        }
+
+        // Join the setClauses array into a comma-separated string for the SET clause in the SQL query
+        const setClause = setClauses.join(', ');
+        values.push(time, id);
+
         const [result] = await db.execute(
-            'UPDATE challenge SET joiner=?, challenge_status=?, room_code=?, amount=?, admin_approval=?, updated_by=?, updated_time=NOW() WHERE id=?',
-            [joiner, challenge_status, room_code, amount, admin_approval, updated_by, id]
+            `UPDATE challenge SET ${setClause}, updated_time=? WHERE id=?`,
+            values
         );
 
         return result.affectedRows > 0;
