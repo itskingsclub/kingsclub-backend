@@ -1,6 +1,6 @@
 const UserController = require('../controllers/UserController');
 
-class UserService {
+class userervice {
     static async sendOtp(mobile) {
         // Send OTP
         const res = await UserController.sendOtp(mobile);
@@ -14,4 +14,4 @@ class UserService {
     }
 }
 
-module.exports = UserService;
+module.exports = userervice;

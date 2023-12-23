@@ -8,7 +8,7 @@ Lets see then in action...
 
 01.  ### Register User
 
-        https://api-kings.vercel.app/users/register
+        https://api-kings.vercel.app/user/register
 
         ```javascript
             {

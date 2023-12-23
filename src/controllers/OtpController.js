@@ -8,7 +8,7 @@ class OtpController {
         const { mobile } = req.body;
         try {
             const [user] = await db.execute(
-                "SELECT * FROM users WHERE mobile = ?",
+                "SELECT * FROM user WHERE mobile = ?",
                 [mobile]
             );
 
@@ -67,7 +67,7 @@ class OtpController {
 
         try {
             const [user] = await db.execute(
-                "SELECT * FROM users WHERE mobile = ?",
+                "SELECT * FROM user WHERE mobile = ?",
                 [mobile]
             );
 
@@ -152,7 +152,7 @@ class OtpController {
 
         try {
             const [user] = await db.execute(
-                "SELECT * FROM users WHERE mobile = ?",
+                "SELECT * FROM user WHERE mobile = ?",
                 [mobile]
             );
 

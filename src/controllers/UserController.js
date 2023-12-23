@@ -22,7 +22,7 @@ class UserController {
 
         try {
             const [rows] = await db.execute(
-                "SELECT * FROM users WHERE mobile = ?",
+                "SELECT * FROM user WHERE mobile = ?",
                 [mobile]
             );
 
@@ -45,7 +45,7 @@ class UserController {
             } else {
 
                 const [result] = await db.execute(
-                    "INSERT INTO users ( name, email, mobile, referral_code, invite_code, admin, block, total_coin, friend_list, challenges, depost_history, withdral_history,created_time, updated_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    "INSERT INTO user ( name, email, mobile, referral_code, invite_code, admin, block, total_coin, friend_list, challenges, depost_history, withdral_history,created_time, updated_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     [name, email, mobile, referral_code, invite_code, admin, block, total_coin, friend_list, challenges, depost_history, withdral_history, created_time, updated_time]
                 );
 
@@ -76,7 +76,7 @@ class UserController {
         const { userId } = req.params;
 
         try {
-            const [rows] = await db.execute("SELECT * FROM users WHERE id = ?", [
+            const [rows] = await db.execute("SELECT * FROM user WHERE id = ?", [
                 userId,
             ]);
 
@@ -104,7 +104,7 @@ class UserController {
     static async getUser(mobile) {
         try {
             const [rows] = await db.execute(
-                "SELECT * FROM users WHERE mobile = ?",
+                "SELECT * FROM user WHERE mobile = ?",
                 [mobile]
             );
 
@@ -132,9 +132,9 @@ class UserController {
         }
     }
 
-    static async getAllUsers(req, res) {
+    static async getAlluser(req, res) {
         try {
-            const [rows] = await db.execute("SELECT * FROM users");
+            const [rows] = await db.execute("SELECT * FROM user");
             res.json({
                 success: true,
                 message: "User fetched successfully",
@@ -215,7 +215,7 @@ class UserController {
         try {
             values.push(time, mobile); // Add updated_time and mobile to the values array
             const [result] = await db.execute(
-                `UPDATE users SET ${setClause}, updated_time=? WHERE mobile=?`,
+                `UPDATE user SET ${setClause}, updated_time=? WHERE mobile=?`,
                 values
             );
 
@@ -243,7 +243,7 @@ class UserController {
         const { userId } = req.params;
 
         try {
-            const [result] = await db.execute("DELETE FROM users WHERE id=?", [
+            const [result] = await db.execute("DELETE FROM user WHERE id=?", [
                 userId,
             ]);
 

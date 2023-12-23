@@ -2,7 +2,7 @@ const db = require('../config/db');
 
 class User {
     static async createUser(name, email, mobile) {
-        const [result] = await db.execute('INSERT INTO users (name, email, mobile) VALUES (?, ?, ?)', [
+        const [result] = await db.execute('INSERT INTO user (name, email, mobile) VALUES (?, ?, ?)', [
             name,
             email,
             mobile
@@ -12,18 +12,18 @@ class User {
     }
 
     static async getUserById(userId) {
-        const [rows] = await db.execute('SELECT * FROM users WHERE id = ?', [userId]);
+        const [rows] = await db.execute('SELECT * FROM user WHERE id = ?', [userId]);
         return rows[0];
     }
 
-  static async getAllUsers() {
-    const [rows] = await db.execute('SELECT * FROM users');
+    static async getAlluser() {
+        const [rows] = await db.execute('SELECT * FROM user');
     return rows;
   }
 
     static async updateUser(userId, newData) {
         const { name, email, mobile } = newData;
-        const [result] = await db.execute('UPDATE users SET name=?, email=?, mobile=? WHERE id=?', [
+        const [result] = await db.execute('UPDATE user SET name=?, email=?, mobile=? WHERE id=?', [
             name,
             email,
             mobile,
@@ -34,7 +34,7 @@ class User {
     }
 
     static async deleteUser(userId) {
-        const [result] = await db.execute('DELETE FROM users WHERE id=?', [userId]);
+        const [result] = await db.execute('DELETE FROM user WHERE id=?', [userId]);
         return result.affectedRows > 0;
     }
 }
