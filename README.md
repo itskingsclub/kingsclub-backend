@@ -3,6 +3,8 @@
 1. Register User
 2. Log In
 3. Verify OTP
+4. Create Challenge
+5. Update Challenge
 
 Lets see then in action...
 
