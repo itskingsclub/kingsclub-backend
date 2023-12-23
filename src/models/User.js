@@ -1,34 +1,32 @@
 const db = require('../config/db');
 
 class User {
-    static async createUser(user_name, email, password, mobile_number) {
-        const [result] = await db.execute('INSERT INTO users (user_name, email, password, mobile_number) VALUES (?, ?, ?, ?)', [
-            user_name,
+    static async createUser(name, email, mobile) {
+        const [result] = await db.execute('INSERT INTO user (name, email, mobile) VALUES (?, ?, ?)', [
+            name,
             email,
-            password,
-            mobile_number
+            mobile
         ]);
 
         return result.insertId;
     }
 
     static async getUserById(userId) {
-        const [rows] = await db.execute('SELECT * FROM users WHERE id = ?', [userId]);
+        const [rows] = await db.execute('SELECT * FROM user WHERE id = ?', [userId]);
         return rows[0];
     }
 
-  static async getAllUsers() {
-    const [rows] = await db.execute('SELECT * FROM users');
+    static async getAlluser() {
+        const [rows] = await db.execute('SELECT * FROM user');
     return rows;
   }
 
     static async updateUser(userId, newData) {
-        const { user_name, email, password, mobile_number } = newData;
-        const [result] = await db.execute('UPDATE users SET user_name=?, email=?, password=?, mobile_number=? WHERE id=?', [
-            user_name,
+        const { name, email, mobile } = newData;
+        const [result] = await db.execute('UPDATE user SET name=?, email=?, mobile=? WHERE id=?', [
+            name,
             email,
-            password,
-            mobile_number,
+            mobile,
             userId,
         ]);
 
@@ -36,7 +34,7 @@ class User {
     }
 
     static async deleteUser(userId) {
-        const [result] = await db.execute('DELETE FROM users WHERE id=?', [userId]);
+        const [result] = await db.execute('DELETE FROM user WHERE id=?', [userId]);
         return result.affectedRows > 0;
     }
 }

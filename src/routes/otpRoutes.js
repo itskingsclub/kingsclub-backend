@@ -9,9 +9,9 @@ router.post('/log-in', OtpController.createOtp);
 router.post('/verify-otp', OtpController.verifyOtp);
 
 // router.post('/send-otp/', async (req, res) => {
-//     const { mobile_number } = req.body;
+//     const { mobile } = req.body;
 //     try {
-//         const result = await OtpController.createOtp(mobile_number);
+//         const result = await OtpController.createOtp(mobile);
 //         res.json(result);
 //     } catch (error) {
 //         console.error(error);

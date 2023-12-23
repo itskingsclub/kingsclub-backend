@@ -4,8 +4,8 @@ const generateOtp = () => {
 };
 
 // Function to send OTP via SMS (dummy implementation)
-const sendOtp = (mobile_number, otp) => {
-    console.log(`Sending OTP ${otp} to ${mobile_number} via SMS`);
+const sendOtp = (mobile, otp) => {
+    console.log(`Sending OTP ${otp} to ${mobile} via SMS`);
     // Implement the actual logic to send OTP via SMS using a third-party service or any other method
 };
 

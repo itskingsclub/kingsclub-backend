@@ -1,22 +1,24 @@
 const Otp = require("../models/Otp");
 const db = require("../config/db");
 const { generateOtp, sendOtp } = require("../utils/otpUtils");
+const { generateAuthToken } = require('../utils/authUtils');
 
 class OtpController {
     static async createOtp(req, res) {
-        const { mobile_number } = req.body;
+        const { mobile } = req.body;
         try {
             const [user] = await db.execute(
-                "SELECT * FROM users WHERE mobile_number = ?",
-                [mobile_number]
+                "SELECT * FROM user WHERE mobile = ?",
+                [mobile]
             );
 
             // User Found
             if (user.length > 0) {
                 const [otp] = await db.execute(
-                    "SELECT * FROM otp WHERE mobile_number = ?",
-                    [mobile_number]
+                    "SELECT * FROM otp WHERE mobile = ?",
+                    [mobile]
                 );
+                const { id: user_id } = user[0];
 
                 // OTP Exists
                 if (otp.length > 0) {
@@ -24,23 +26,24 @@ class OtpController {
                         success: true,
                         message: "OTP sent successfully",
                         data: {
-                            code: otp[0]?.code,
+                            pin: otp[0]?.pin,
                         },
                     });
                 } else {
-                    const code = generateOtp(); // Implement your OTP generation logic
+                    const pin = generateOtp(); // Implement your OTP generation logic
                     const expiry = new Date(Date.now() + 5 * 60 * 1000); // Set OTP expiry to 5 minutes from now
+                    const created_time = new Date(Date.now());
 
                     const [result] = await db.execute(
-                        "INSERT INTO otp (mobile_number, code, expiry) VALUES (?, ?, ?)",
-                        [mobile_number, code, expiry]
+                        "INSERT INTO otp (user_id, mobile, pin, expiry, created_time) VALUES (?, ?, ?, ?, ?)",
+                        [user_id, mobile, pin, expiry, created_time]
                     );
-                    await sendOtp(mobile_number, code); // Implement your OTP sending logic
+                    await sendOtp(mobile, pin); // Implement your OTP sending logic
                     res.json({
                         success: true,
                         message: "OTP sent successfully",
                         data: {
-                            code: code,
+                            pin: pin,
                         },
                     });
                 }
@@ -60,20 +63,21 @@ class OtpController {
 
     // send
     static async sendOTP(req, res) {
-        const { mobile_number } = req.body;
+        const { mobile } = req.body;
 
         try {
             const [user] = await db.execute(
-                "SELECT * FROM users WHERE mobile_number = ?",
-                [mobile_number]
+                "SELECT * FROM user WHERE mobile = ?",
+                [mobile]
             );
 
             // User Found
             if (user.length > 0) {
                 const [otp] = await db.execute(
-                    "SELECT * FROM otp WHERE mobile_number = ?",
-                    [mobile_number]
+                    "SELECT * FROM otp WHERE mobile = ?",
+                    [mobile]
                 );
+                const { id: user_id } = user[0];
 
                 // OTP Exists
                 if (otp.length > 0) {
@@ -81,24 +85,25 @@ class OtpController {
                         success: true,
                         message: "OTP sent successfully",
                         data: {
-                            code: otp[0]?.code,
+                            pin: otp[0]?.pin,
                         },
                     };
                 } else {
-                    const code = generateOtp(); // Implement your OTP generation logic
+                    const pin = generateOtp(); // Implement your OTP generation logic
                     const expiry = new Date(Date.now() + 5 * 60 * 1000); // Set OTP expiry to 5 minutes from now
+                    const created_time = new Date(Date.now());
 
                     const [result] = await db.execute(
-                        "INSERT INTO otp (mobile_number, code, expiry) VALUES (?, ?, ?)",
-                        [mobile_number, code, expiry]
+                        "INSERT INTO otp (user_id, mobile, pin, expiry, created_time) VALUES (?, ?, ?, ?, ?)",
+                        [user_id, mobile, pin, expiry, created_time]
                     );
 
-                    await sendOtp(mobile_number, code); // Implement your OTP sending logic
+                    await sendOtp(mobile, pin); // Implement your OTP sending logic
                     return {
                         success: true,
                         message: "OTP sent successfully",
                         data: {
-                            code: code,
+                            pin: pin,
                         },
                   };
                 }
@@ -116,11 +121,11 @@ class OtpController {
         }
     }
 
-    static async getOtp(mobile_number) {
+    static async getOtp(mobile) {
         try {
             const [rows] = await db.execute(
-                "SELECT * FROM otp WHERE mobile_number = ?",
-                [mobile_number]
+                "SELECT * FROM otp WHERE mobile = ?",
+                [mobile]
             );
 
             if (rows.length > 0) {
@@ -143,19 +148,19 @@ class OtpController {
 
     // verify
     static async verifyOtp(req, res) {
-        const { mobile_number, code } = req.body;
+        const { mobile, pin } = req.body;
 
         try {
             const [user] = await db.execute(
-                "SELECT * FROM users WHERE mobile_number = ?",
-                [mobile_number]
+                "SELECT * FROM user WHERE mobile = ?",
+                [mobile]
             );
 
             // User Found
             if (user.length > 0) {
                 const [otp] = await db.execute(
-                    "SELECT * FROM otp WHERE mobile_number = ?",
-                    [mobile_number]
+                    "SELECT * FROM otp WHERE mobile = ?",
+                    [mobile]
                 );
 
                 // OTP Exists
@@ -163,30 +168,58 @@ class OtpController {
                     const { expiry } = otp[0];
                     const isExpired = new Date(Date.now()) > expiry;
 
-                    if (isExpired || code !== otp[0]?.code) {
+                    if (pin == otp[0]?.pin && mobile === otp[0]?.mobile) {
+
+                        // OTP Exists
+                        if (isExpired) {
+                            const [result] = await db.execute(
+                                "DELETE FROM otp WHERE mobile=?",
+                                [mobile]
+                            );
+                            if (result.affectedRows > 0) {
+                                res.status(401).json({
+                                    success: false,
+                                    message: "OTP has expired, Try again",
+                                });
+                            } else {
+                                res.status(500).json({
+                                    success: false,
+                                    message: "Internal Server Error",
+                                });
+                            }
+                        } else {
+                            const [result] = await db.execute(
+                                "DELETE FROM otp WHERE mobile=?",
+                                [mobile]
+                            );
+
+                            if (result.affectedRows > 0) {
+                                const authToken = generateAuthToken(mobile);
+                                if (result.affectedRows > 0) {
+                                    res.json({
+                                        success: true,
+                                        message: "OTP verified successfully",
+                                        token: authToken,
+                                        data: user[0],
+                                    });
+                                }
+
+                            } else {
+                                res.status(500).json({
+                                    success: false,
+                                    message: "Internal Server Error",
+                                });
+                            }
+                        }
+                    }
+
+                    else {
                         res.status(401).json({
                             success: false,
                             message: "Invalid OTP",
                         });
-                    } else {
-                        const [result] = await db.execute(
-                            "DELETE FROM otp WHERE mobile_number=?",
-                            [mobile_number]
-                        );
-
-                        if (result.affectedRows > 0) {
-                            res.json({
-                                success: true,
-                                message: "OTP verified successfully",
-                                data: user[0],
-                            });
-                        } else {
-                            res.status(500).json({
-                                success: false,
-                                message: "Internal Server Error",
-                            });
-                        }
                     }
+
                 } else {
                     res.status(401).json({
                         success: false,
@@ -214,11 +247,11 @@ class OtpController {
             await Otp.clearOtp(userId);
         }
 
-        const code = generateOtp(); // Implement your OTP generation logic
+        const pin = generateOtp(); // Implement your OTP generation logic
         const expiry = new Date(Date.now() + 5 * 60 * 1000); // Set OTP expiry to 5 minutes from now
 
-        await Otp.createOtp(userId, code, expiry);
-        await sendOtp(userId, code); // Implement your OTP sending logic
+        await Otp.createOtp(userId, pin, expiry);
+        await sendOtp(userId, pin); // Implement your OTP sending logic
 
         return { message: "OTP resent successfully" };
     }

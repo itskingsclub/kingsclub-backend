@@ -1,17 +1,17 @@
 const UserController = require('../controllers/UserController');
 
-class UserService {
-    static async sendOtp(mobile_number) {
+class userervice {
+    static async sendOtp(mobile) {
         // Send OTP
-        const res = await UserController.sendOtp(mobile_number);
+        const res = await UserController.sendOtp(mobile);
         return res;
     }
 
-    static async getUser(mobile_number) {
+    static async getUser(mobile) {
         // Send OTP
-        const res = await UserController.getUser(mobile_number);
+        const res = await UserController.getUser(mobile);
         return res;
     }
 }
 
-module.exports = UserService;
+module.exports = userervice;
