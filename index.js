@@ -1,7 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const userRoutes = require('./src/routes/userRoutes');
-const otpRoutes = require('./src/routes/otpRoutes');
 const challengeRoutes = require('./src/routes/challengeRoutes')
 const sequelize = require('./src/config/db');
 
@@ -16,7 +15,6 @@ app.use(express.json());
 
 app.use(bodyParser.json());
 app.use('/user', userRoutes);
-app.use('/auth', otpRoutes);
 app.use('/challenge', challengeRoutes);
 
 
