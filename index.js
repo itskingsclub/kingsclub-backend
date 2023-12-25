@@ -8,7 +8,7 @@ const sequelize = require('./src/config/db');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-sequelize.sync({ force: true }).then(() => {
+sequelize.sync().then(() => {
   console.log('Database and tables created!');
 });
 
