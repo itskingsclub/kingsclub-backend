@@ -1,23 +1,24 @@
-// routes/challengeRoutes.js
 const express = require('express');
 const ChallengeController = require('../controllers/ChallengeController');
 const { verifyToken } = require('../utils/authUtils');
-
-const router = express.Router();
+const router = express.Router()
 
 // Route for creating a challenge
 router.post('/create', ChallengeController.createChallenge);
 
-// Route for getting a challenge by ID
-router.get('/:challengeId', ChallengeController.getChallengeById);
-
-// Route for getting all challenges
+// Get all challenge
 router.get('/', ChallengeController.getAllChallenges);
 
-// Route for updating a challenge
-router.put('/update', ChallengeController.updateChallenge);
+// Get a specific challenge by ID
+router.get('/:id', ChallengeController.getChallengeById);
 
-// Route for deleting a challenge
-router.delete('/:challengeId', ChallengeController.deleteChallenge);
+// Update a challenge by ID
+router.put('/update', ChallengeController.updateChallengeById);
+
+// Delete a challenge by ID
+router.delete('/delete', ChallengeController.deleteChallengeById);
+
+// Get challenges for specific user by ID
+router.post('/my-challenges', ChallengeController.getAllChallengesForUser);
 
 module.exports = router;

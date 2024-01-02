@@ -1,23 +1,29 @@
-const db = require('../config/db');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+const User = require('./User');
 
-class Otp {
-    static async createOtp(user_id, mobile, pin, expiry, created_time) {
-        const [result] = await db.execute('INSERT INTO otp (user_id, mobile, pin, expiry, created_time) VALUES (?, ?, ?, ?, ?)', [user_id, mobile, pin, expiry, created_time]);
-        return result.insertId;
-    }
-
-    static async getOtp(mobile) {
-        const [rows] = await db.execute('SELECT * FROM otp WHERE mobile = ? AND expiry > NOW() ORDER BY id DESC LIMIT 1', [
-            mobile,
-        ]);
-
-        return rows[0];
-    }
-
-    static async clearOtp(mobile) {
-        const [result] = await db.execute('DELETE FROM otp WHERE mobile = ?', [mobile]);
-        return result.affectedRows > 0;
-    }
-}
+const Otp = sequelize.define('Otp', {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        allowNull: false,
+        autoIncrement: true
+    },
+    mobile: {
+        type: DataTypes.STRING(45),
+        primaryKey: true,
+        allowNull: false,
+        unique: true
+    },
+    pin: {
+        type: DataTypes.STRING(45),
+        allowNull: false,
+        unique: true
+    },
+    expiry: {
+        type: DataTypes.DATE,
+        allowNull: false
+    },
+});
 
 module.exports = Otp;

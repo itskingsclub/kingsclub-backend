@@ -1,99 +1,25 @@
-const db = require("../config/db");
+const User = require('../models/User');
 const OtpService = require("../services/OtpService");
-const { generateInviteCode } = require('../utils/numberUtils');
-
 class UserController {
+    // Create a new user
     static async createUser(req, res) {
-        const time = new Date(Date.now());
-        const invite_code = generateInviteCode();
-        const { name,
-            email = null,
-            mobile,
-            referral_code = null,
-            admin = false,
-            block = false,
-            total_coin = 500,
-            friend_list = null,
-            challenges = null,
-            depost_history = null,
-            withdral_history = null,
-            created_time = time,
-            updated_time = time } = req.body;
-
+        const { mobile } = req.body;
         try {
-            const [rows] = await db.execute(
-                "SELECT * FROM user WHERE mobile = ?",
-                [mobile]
-            );
-
-            // User exists
-            if (rows.length > 0) {
-                const sendOtp = await OtpService.sendOtp(req, res);
-
-                if (sendOtp?.success) {
-                    res.json({
-                        success: true,
-                        message: "User already exists, OTP sent successfully",
-                        data: sendOtp?.data,
-                    });
-                } else {
-                    res.status(500).json({
-                        success: false,
-                        message: "Internal Server Error",
-                    });
-                }
-            } else {
-
-                const [result] = await db.execute(
-                    "INSERT INTO user ( name, email, mobile, referral_code, invite_code, admin, block, total_coin, friend_list, challenges, depost_history, withdral_history,created_time, updated_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                    [name, email, mobile, referral_code, invite_code, admin, block, total_coin, friend_list, challenges, depost_history, withdral_history, created_time, updated_time]
-                );
-
-                const sendOtp = await OtpService.sendOtp(req, res);
-
-                if (sendOtp?.success) {
-                    res.json({
-                        success: true,
-                        message: "User created, OTP sent successfully",
-                        data: sendOtp?.data,
-                    });
-                } else {
-                    res.status(500).json({
-                        success: false,
-                        message: "Internal Server Error",
-                    });
-                }
-            }
-        } catch (error) {
-            res.status(500).json({
-                success: false,
-                message: "Internal Server Error",
-            });
-        }
-    }
-
-    static async getUserById(req, res) {
-        const { userId } = req.params;
-
-        try {
-            const [rows] = await db.execute("SELECT * FROM user WHERE id = ?", [
-                userId,
-            ]);
-
-            if (rows.length > 0) {
-                res.json({
-                    success: true,
-                    message: "User found",
-                    data: rows[0],
+            const user = await User.findOne({ where: { mobile } });
+            if (user) {
+                res.status(409).json({
+                    success: false,
+                    message: "User already exists, please login",
                 });
             } else {
-                res.status(404).json({
-                    success: false,
-                    message: "User not found",
+                const newUser = await User.create({ ...req.body, total_coin: 500 });
+                res.status(201).json({
+                    success: true,
+                    message: "User created, Otp sent successfully",
+                    data: newUser
                 });
             }
         } catch (error) {
-            console.error(error);
             res.status(500).json({
                 success: false,
                 message: "Internal Server Error",
@@ -101,171 +27,193 @@ class UserController {
         }
     }
 
-    static async getUser(mobile) {
+    // Get all users
+    static async getAllUsers(req, res) {
         try {
-            const [rows] = await db.execute(
-                "SELECT * FROM user WHERE mobile = ?",
-                [mobile]
-            );
-
-            if (rows.length > 0) {
-                res.json(rows[0]);
-                return {
-                    success: false,
-                    message: "User found",
-                    data: rows[0],
-                };
-            } else {
-                res.status(404).send("User not found");
-                return {
-                    success: true,
-                    message: "User not found",
-                    data: rows[0],
-                };
-            }
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({
-                success: false,
-                message: "Internal Server Error",
-            });
-        }
-    }
-
-    static async getAlluser(req, res) {
-        try {
-            const [rows] = await db.execute("SELECT * FROM user");
-            res.json({
+            const users = await User.findAll();
+            res.status(200).json({
                 success: true,
-                message: "User fetched successfully",
-                data: rows,
+                message: "All user fetched successfully",
+                data: users
             });
         } catch (error) {
-            console.error(error);
-            res.status(500).json({
-                success: false,
-                message: "Internal Server Error",
-            });
+            res.status(500).json({ success: false, error: 'Error fetching users' });
         }
     }
 
-    static async updateUser(req, res) {
-        const time = new Date(Date.now());
-        const { name,
-            email,
-            mobile,
-            referral_code,
-            admin,
-            block,
-            total_coin,
-            friend_list,
-            challenges,
-            depost_history,
-            withdral_history } = req.body;
-
-        // Create an array to hold the SET clauses for the fields that are provided
-        const setClauses = [];
-        const values = [];
-
-        // Add each field to the setClauses and values arrays if it is provided
-        if (name) {
-            setClauses.push('name=?');
-            values.push(name);
-        }
-        if (email !== undefined) {
-            setClauses.push('email=?');
-            values.push(email);
-        }
-        if (referral_code !== undefined) {
-            setClauses.push('referral_code=?');
-            values.push(referral_code);
-        }
-        if (admin !== undefined) {
-            setClauses.push('admin=?');
-            values.push(admin);
-        }
-        if (block !== undefined) {
-            setClauses.push('block=?');
-            values.push(block);
-        }
-        if (total_coin !== undefined) {
-            setClauses.push('total_coin=?');
-            values.push(total_coin);
-        }
-        if (friend_list !== undefined) {
-            setClauses.push('friend_list=?');
-            values.push(friend_list);
-        }
-        if (challenges !== undefined) {
-            setClauses.push('challenges=?');
-            values.push(challenges);
-        }
-        if (depost_history !== undefined) {
-            setClauses.push('depost_history=?');
-            values.push(depost_history);
-        }
-        if (withdral_history !== undefined) {
-            setClauses.push('withdral_history=?');
-            values.push(withdral_history);
-        }
-
-        // Join the setClauses array into a comma-separated string for the SET clause in the SQL query
-        const setClause = setClauses.join(', ');
-
+    // Get a specific user by Id
+    static async getUserById(req, res) {
+        const { id } = req.params;
         try {
-            values.push(time, mobile); // Add updated_time and mobile to the values array
-            const [result] = await db.execute(
-                `UPDATE user SET ${setClause}, updated_time=? WHERE mobile=?`,
-                values
-            );
-
-            if (result.affectedRows > 0) {
-                res.json({
+            const user = await User.findOne({ where: { id } });
+            if (user) {
+                res.status(200).json({
                     success: true,
-                    message: "User updated successfully",
+                    message: "User fetched successfully",
+                    data: user
                 });
             } else {
                 res.status(404).json({
                     success: false,
-                    message: "User not found",
+                    message: 'User not found'
                 });
             }
         } catch (error) {
             console.error(error);
             res.status(500).json({
                 success: false,
-                message: "Internal Server Error",
+                message: 'Error fetching user'
             });
         }
     }
 
-    static async deleteUser(req, res) {
-        const { userId } = req.params;
-
+    // Update a user by Id
+    static async updateUserById(req, res) {
+        const { id } = req.body;
+        console.log("PV", req.body)
         try {
-            const [result] = await db.execute("DELETE FROM user WHERE id=?", [
-                userId,
-            ]);
-
-            if (result.affectedRows > 0) {
-                res.json({
+            const [updatedRowsCount] = await User.update(req.body, { where: { id } });
+            if (updatedRowsCount > 0) {
+                res.status(200).json({
                     success: true,
-                    message: "User deleted successfully",
+                    message: 'User updated successfully'
                 });
             } else {
                 res.status(404).json({
                     success: false,
-                    message: "User not found",
+                    message: 'User not found'
                 });
             }
         } catch (error) {
             console.error(error);
             res.status(500).json({
                 success: false,
+                message: 'Error updating user'
+            });
+        }
+    }
+
+    // Delete a user by Id
+    static async deleteUserById(req, res) {
+        const { id } = req.body;
+        try {
+            const deletedRowCount = await User.destroy({ where: { id } });
+            if (deletedRowCount > 0) {
+                res.status(200).json({
+                    success: true,
+                    message: 'User deleted successfully'
+                });
+            } else {
+                res.status(404).json({
+                    success: false,
+                    message: 'User not found'
+                });
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({
+                success: false,
+                message: 'Error deleting user'
+            });
+        }
+    }
+
+    // Log In User 
+    static async logInUser(req, res) {
+        const { mobile } = req.body;
+        try {
+            const user = await User.findOne({ where: { mobile } });
+            if (user) {
+                const sendOtp = await OtpService.sendOtp(mobile);
+                console.log("PV sendOtp", sendOtp)
+                if (sendOtp?.success) {
+                    res.status(200).json({
+                        success: true,
+                        message: sendOtp?.message,
+                        data: sendOtp?.data
+                    });
+                } else {
+                    res.status(500).json({
+                        success: false,
+                        message: 'Error login user'
+                    });
+                }
+
+            } else {
+                res.status(404).json({
+                    success: false,
+                    message: 'User not found'
+                });
+            }
+        } catch (error) {
+            res.status(500).json({
+                success: false,
                 message: "Internal Server Error",
             });
         }
     }
+
+    // verify Pin
+    static async verifyPin(req, res) {
+        const { mobile, pin } = req.body;
+        try {
+            const user = await User.findOne({ where: { mobile } });
+            if (user) {
+                const verifyOTP = await OtpService.verifyOTP(mobile, pin);
+                console.log("PV ", verifyOTP)
+                if (verifyOTP?.success) {
+                    res.status(200).json({
+                        success: true,
+                        message: verifyOTP?.message,
+                        token: verifyOTP?.token,
+                        data: user,
+                    });
+                } else {
+                    res.status(500).json({
+                        success: false,
+                        message: verifyOTP?.message,
+                    });
+                }
+
+            } else {
+                res.status(404).json({
+                    success: false,
+                    message: 'User not found'
+                });
+            }
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: "Internal Server Error",
+            });
+        }
+    }
+
+    // Update a user service
+    static async updateUserService(req, res) {
+        const { amount, creator, } = req.body;
+        try {
+            const [updatedRowsCount] = await User.update(req.body, { where: { id: creator } });
+            if (updatedRowsCount > 0) {
+                res.status(200).json({
+                    success: true,
+                    message: 'User updated successfully'
+                });
+            } else {
+                res.status(404).json({
+                    success: false,
+                    message: 'User not found'
+                });
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({
+                success: false,
+                message: 'Error updating user'
+            });
+        }
+    }
+
 }
 
 module.exports = UserController;
