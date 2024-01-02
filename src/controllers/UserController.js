@@ -1,7 +1,7 @@
 const User = require('../models/User');
 const OtpService = require("../services/OtpService");
 class UserController {
-    // Create a new use
+    // Create a new user
     static async createUser(req, res) {
         const { mobile } = req.body;
         try {
@@ -185,6 +185,31 @@ class UserController {
             res.status(500).json({
                 success: false,
                 message: "Internal Server Error",
+            });
+        }
+    }
+
+    // Update a user service
+    static async updateUserService(req, res) {
+        const { amount, creator, } = req.body;
+        try {
+            const [updatedRowsCount] = await User.update(req.body, { where: { id: creator } });
+            if (updatedRowsCount > 0) {
+                res.status(200).json({
+                    success: true,
+                    message: 'User updated successfully'
+                });
+            } else {
+                res.status(404).json({
+                    success: false,
+                    message: 'User not found'
+                });
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({
+                success: false,
+                message: 'Error updating user'
             });
         }
     }
