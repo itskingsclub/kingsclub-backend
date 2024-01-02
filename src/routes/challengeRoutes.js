@@ -18,4 +18,7 @@ router.put('/update', ChallengeController.updateChallengeById);
 // Delete a challenge by ID
 router.delete('/delete', ChallengeController.deleteChallengeById);
 
+// Get challenges for specific user by ID
+router.post('/my-challenges', ChallengeController.getAllChallengesForUser);
+
 module.exports = router;

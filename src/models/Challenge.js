@@ -60,4 +60,8 @@ const Challenge = sequelize.define('Challenge', {
     },
 });
 
+// Define associations
+Challenge.belongsTo(User, { foreignKey: 'creator', as: 'creatorUser' });
+Challenge.belongsTo(User, { foreignKey: 'joiner', as: 'joinerUser' });
+
 module.exports = Challenge;

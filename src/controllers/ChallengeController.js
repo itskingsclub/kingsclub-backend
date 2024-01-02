@@ -1,6 +1,7 @@
 const Challenge = require('../models/Challenge');
 const User = require('../models/User');
 const OtpService = require("../services/OtpService");
+const { Op } = require("sequelize");
 
 class ChallengeController {
     // Create a new Challenge
@@ -38,7 +39,13 @@ class ChallengeController {
     // Get all Challenges
     static async getAllChallenges(req, res) {
         try {
-            const Challenges = await Challenge.findAll();
+            const Challenges = await Challenge.findAll({
+                include: [
+                    { model: User, as: 'creatorUser' },
+                    { model: User, as: 'joinerUser' },
+                ],
+            });
+
             res.status(200).json({
                 success: true,
                 message: "All Challenge fetched successfully",
@@ -54,11 +61,18 @@ class ChallengeController {
         const { id } = req.params;
         try {
             const challenge = await Challenge.findOne({ where: { id } });
+            const challengeWithUsers = await Challenge.findByPk(id, {
+                include: [
+                    { model: User, as: 'creatorUser' },
+                    { model: User, as: 'joinerUser' },
+                ],
+            });
+            console.log()
             if (challenge) {
                 res.status(200).json({
                     success: true,
                     message: "Challenge fetched successfully",
-                    data: challenge
+                    data: challengeWithUsers
                 });
             } else {
                 res.status(404).json({
@@ -124,6 +138,36 @@ class ChallengeController {
             });
         }
     }
+
+    static async getAllChallengesForUser(req, res) {
+        const { id } = req.body;
+
+        try {
+            // Fetch challenges where the user is the creator or joiner
+            const challenges = await Challenge.findAll({
+                where: {
+                    [Op.or]: [{ creator: id }, { joiner: id }],
+                },
+                include: [
+                    { model: User, as: 'creatorUser' },
+                    { model: User, as: 'joinerUser' },
+                ],
+            });
+
+            res.json({
+                success: true,
+                message: 'Challenges fetched successfully',
+                data: challenges,
+            });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({
+                success: false,
+                message: 'Internal Server Error',
+            });
+        }
+    }
+
 }
 
 module.exports = ChallengeController;
