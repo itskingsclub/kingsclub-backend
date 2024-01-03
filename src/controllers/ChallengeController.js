@@ -39,7 +39,13 @@ class ChallengeController {
     // Get all Challenges
     static async getAllChallenges(req, res) {
         try {
+            const expiry = new Date(Date.now() + 5 * 60 * 1000);
             const Challenges = await Challenge.findAll({
+                where: {
+                    expiry_time: {
+                        [Op.gt]: expiry,
+                    },
+                },
                 include: [
                     { model: User, as: 'creatorUser' },
                     { model: User, as: 'joinerUser' },
