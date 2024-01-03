@@ -39,7 +39,13 @@ class ChallengeController {
     // Get all Challenges
     static async getAllChallenges(req, res) {
         try {
+            const expiry = new Date(Date.now() + 5 * 60 * 1000);
             const Challenges = await Challenge.findAll({
+                where: {
+                    expiry_time: {
+                        [Op.gt]: expiry,
+                    },
+                },
                 include: [
                     { model: User, as: 'creatorUser' },
                     { model: User, as: 'joinerUser' },
@@ -67,7 +73,7 @@ class ChallengeController {
                     { model: User, as: 'joinerUser' },
                 ],
             });
-            console.log()
+
             if (challenge) {
                 res.status(200).json({
                     success: true,
@@ -91,14 +97,58 @@ class ChallengeController {
 
     // Update a Challenge by Id
     static async updateChallengeById(req, res) {
-        const { id } = req.body;
+        const { id, joiner } = req.body;
         try {
-            const [updatedRowsCount] = await Challenge.update(req.body, { where: { id } });
-            if (updatedRowsCount > 0) {
-                res.status(200).json({
-                    success: true,
-                    message: 'Challenge updated successfully'
-                });
+            const challenge = await Challenge.findOne({ where: { id } });
+            if (challenge) {
+                const { creator, amount } = challenge?.dataValues;
+                if (joiner) {
+                    if (creator != joiner) {
+                        const joinerUser = await User.findOne({ where: { id: joiner } });
+                        if (!joinerUser || joinerUser?.dataValues?.total_coin < amount) {
+                            return res.status(400).json({
+                                success: false,
+                                message: 'Joiner does not have enough coins for the challenge',
+                            });
+                        }
+                        else {
+                            const [updatedRowsCount] = await Challenge.update(req.body, { where: { id } });
+                            if (updatedRowsCount > 0) {
+                                joinerUser.total_coin -= amount;
+                                await joinerUser.save();
+                                res.status(200).json({
+                                    success: true,
+                                    message: 'Challenge updated successfully'
+                                });
+                            } else {
+                                res.status(404).json({
+                                    success: false,
+                                    message: 'Challenge not found'
+                                });
+                            }
+                        }
+                    }
+                    else {
+                        res.status(500).json({
+                            success: false,
+                            message: 'Creater is not allowed for this action'
+                        });
+                    }
+                }
+                else {
+                    const [updatedRowsCount] = await Challenge.update(req.body, { where: { id } });
+                    if (updatedRowsCount > 0) {
+                        res.status(200).json({
+                            success: true,
+                            message: 'Challenge updated successfully'
+                        });
+                    } else {
+                        res.status(500).json({
+                            success: false,
+                            message: 'Error updating Challenge'
+                        });
+                    }
+                }
             } else {
                 res.status(404).json({
                     success: false,
