@@ -91,20 +91,48 @@ class ChallengeController {
 
     // Update a Challenge by Id
     static async updateChallengeById(req, res) {
-        const { id } = req.body;
+        const { id, joiner, amount } = req.body;
         try {
-            const [updatedRowsCount] = await Challenge.update(req.body, { where: { id } });
-            if (updatedRowsCount > 0) {
-                res.status(200).json({
-                    success: true,
-                    message: 'Challenge updated successfully'
-                });
-            } else {
-                res.status(404).json({
-                    success: false,
-                    message: 'Challenge not found'
-                });
+            if (joiner) {
+                const joinerUser = await User.findOne({ where: { id: joiner } });
+                if (!joinerUser || joinerUser?.dataValues?.total_coin < amount) {
+                    return res.status(400).json({
+                        success: false,
+                        message: 'Joiner does not have enough coins for the challenge',
+                    });
+                }
+                else {
+                    const [updatedRowsCount] = await Challenge.update(req.body, { where: { id } });
+                    if (updatedRowsCount > 0) {
+                        joinerUser.total_coin -= amount;
+                        await joinerUser.save();
+                        res.status(200).json({
+                            success: true,
+                            message: 'Challenge updated successfully'
+                        });
+                    } else {
+                        res.status(404).json({
+                            success: false,
+                            message: 'Challenge not found'
+                        });
+                    }
+                }
             }
+            else {
+                const [updatedRowsCount] = await Challenge.update(req.body, { where: { id } });
+                if (updatedRowsCount > 0) {
+                    res.status(200).json({
+                        success: true,
+                        message: 'Challenge updated successfully'
+                    });
+                } else {
+                    res.status(404).json({
+                        success: false,
+                        message: 'Challenge not found'
+                    });
+                }
+            }
+
         } catch (error) {
             console.error(error);
             res.status(500).json({
