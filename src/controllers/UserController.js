@@ -13,11 +13,20 @@ class UserController {
                 });
             } else {
                 const newUser = await User.create({ ...req.body, total_coin: 500 });
-                res.status(201).json({
-                    success: true,
-                    message: "User created, Otp sent successfully",
-                    data: newUser
-                });
+                const sendOtp = await OtpService.sendOtp(mobile);
+                if (sendOtp?.success) {
+                    res.status(200).json({
+                        success: true,
+                        message: sendOtp?.message,
+                        data: sendOtp?.data
+                    });
+                }
+                else {
+                    res.status(500).json({
+                        success: false,
+                        message: 'Error register user'
+                    });
+                }
             }
         } catch (error) {
             res.status(500).json({
@@ -125,7 +134,6 @@ class UserController {
             const user = await User.findOne({ where: { mobile } });
             if (user) {
                 const sendOtp = await OtpService.sendOtp(mobile);
-                console.log("PV sendOtp", sendOtp)
                 if (sendOtp?.success) {
                     res.status(200).json({
                         success: true,
