@@ -251,7 +251,7 @@ class ChallengeController {
                 }
                 else if (joiner && joiner_result) {
                     if (joiner == _joiner) {
-                        const status = getChallengeStatus(joiner_result, _joiner_result);
+                        const status = getChallengeStatus(_creator_result, joiner_result);
                         const [updatedRowsCount] = await Challenge.update({ challenge_status: status, joiner_result, updated_by }, { where: { id } });
                         if (updatedRowsCount > 0) {
                             res.status(200).json({
