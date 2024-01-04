@@ -26,10 +26,10 @@ const Challenge = sequelize.define('Challenge', {
         },
     },
     creator_result: {
-        type: DataTypes.ENUM('Waiting', 'Win', 'Lose', 'Cancel'),
+        type: DataTypes.ENUM('Waiting', 'Win', 'Lose', 'Cancel', 'Fraud'),
     },
     joiner_result: {
-        type: DataTypes.ENUM('Waiting', 'Win', 'Lose', 'Cancel'),
+        type: DataTypes.ENUM('Waiting', 'Win', 'Lose', 'Cancel', 'Fraud'),
     },
     challenge_status: {
         type: DataTypes.ENUM('Waiting', 'Processing', 'Playing', 'Clear', 'Review', 'Fraud', 'Cancel'),

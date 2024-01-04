@@ -478,7 +478,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"id\": 1,\n    \"joiner\":\"2\",\n    \"challenge_status\": \"Processing\",\n    \"updated_by\": \"2\"\n}",
+							"raw": "{\n    \"id\": 1,\n    \"joiner\":\"6\",\n    \"challenge_status\": \"Processing\",\n    \"updated_by\": \"6\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -493,6 +493,58 @@
 							"path": [
 								"challenge",
 								"update"
+							]
+						},
+						"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Result",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtb2JpbGUiOiIxMTExMTExMTE0IiwiaWF0IjoxNzAzMDA3NTAwLCJleHAiOjE3MDMwMTExMDB9.O_mMAcUoMGV5raUEHaNRWRiKl2Y3QaZUJtXEqqELAHY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 5,\n    \"joiner\":\"6\",\n    \"joiner_result\": \"Lose\",\n    \"updated_by\": \"6\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/challenge/update-result",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"challenge",
+								"update-result"
 							]
 						},
 						"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
