@@ -2,6 +2,7 @@ const Challenge = require('../models/Challenge');
 const User = require('../models/User');
 const OtpService = require("../services/OtpService");
 const { Op } = require("sequelize");
+const { getChallengeStatus } = require("../utils/resultUtils");
 
 class ChallengeController {
     // Create a new Challenge
@@ -214,6 +215,80 @@ class ChallengeController {
             res.status(500).json({
                 success: false,
                 message: 'Internal Server Error',
+            });
+        }
+    }
+
+    // Update a Challenge result
+    static async updateChallengeResult(req, res) {
+        const { id, creator, joiner, creator_result, joiner_result, updated_by } = req.body;
+        try {
+            const challenge = await Challenge.findOne({ where: { id } });
+            if (challenge) {
+                const { creator: _creator, joiner: _joiner, creator_result: _creator_result, joiner_result: _joiner_result, amount } = challenge?.dataValues;
+                if (creator && creator_result) {
+                    if (creator == _creator) {
+                        const status = getChallengeStatus(creator_result, _joiner_result);
+                        const [updatedRowsCount] = await Challenge.update({ challenge_status: status, creator_result, updated_by }, { where: { id } });
+                        if (updatedRowsCount > 0) {
+                            res.status(200).json({
+                                success: true,
+                                message: 'Challenge updated successfully'
+                            });
+                        } else {
+                            res.status(500).json({
+                                success: false,
+                                message: 'Error updating Challenge'
+                            });
+                        }
+                    }
+                    else {
+                        res.status(500).json({
+                            success: false,
+                            message: 'Joiner is not found in challenge'
+                        });
+                    }
+                }
+                else if (joiner && joiner_result) {
+                    if (joiner == _joiner) {
+                        const status = getChallengeStatus(_creator_result, joiner_result);
+                        const [updatedRowsCount] = await Challenge.update({ challenge_status: status, joiner_result, updated_by }, { where: { id } });
+                        if (updatedRowsCount > 0) {
+                            res.status(200).json({
+                                success: true,
+                                message: 'Challenge updated successfully'
+                            });
+                        } else {
+                            res.status(500).json({
+                                success: false,
+                                message: 'Error updating Challenge'
+                            });
+                        }
+                    }
+                    else {
+                        res.status(500).json({
+                            success: false,
+                            message: 'Creator is not found in challenge'
+                        });
+                    }
+                }
+                else {
+                    res.status(500).json({
+                        success: false,
+                        message: 'Error updating challenge result 2'
+                    });
+                }
+            } else {
+                res.status(404).json({
+                    success: false,
+                    message: 'Challenge not found'
+                });
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({
+                success: false,
+                message: 'Error updating challenge result 1'
             });
         }
     }
