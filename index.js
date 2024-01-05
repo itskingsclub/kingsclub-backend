@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const userRoutes = require('./src/routes/userRoutes');
 const challengeRoutes = require('./src/routes/challengeRoutes')
+const paymentRoutes = require('./src/routes/payementRoutes')
 const sequelize = require('./src/config/db');
 
 const app = express();
@@ -16,6 +17,7 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use('/user', userRoutes);
 app.use('/challenge', challengeRoutes);
+app.use('/payment', paymentRoutes);
 
 
 app.listen(PORT, () => {
