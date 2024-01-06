@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const userRoutes = require('./src/routes/userRoutes');
 const challengeRoutes = require('./src/routes/challengeRoutes')
-const paymentRoutes = require('./src/routes/payementRoutes')
+const paymentRoutes = require('./src/routes/paymentRoutes')
 const sequelize = require('./src/config/db');
 
 const app = express();

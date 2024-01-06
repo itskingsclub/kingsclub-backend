@@ -7,9 +7,9 @@ class PaymentController {
     static async createPayment(req, res) {
         const { user_id } = req.body;
         try {
-            const user = await User.findOne({ where: { id:user_id } });
+            const user = await User.findOne({ where: { id: user_id } });
             if (user) {
-                const newPayment = await Payment.create({ ...req.body, updated_by: user_id, payment_mode: "Upi",payment_status: "Sucessfull",type:'Withdraw' });
+                const newPayment = await Payment.create({ ...req.body, updated_by: user_id, payment_mode: "Upi", payment_status: "Sucessfull", type: 'Withdraw' });
                 res.status(201).json({
                     success: true,
                     message: "Payment created successfully",
@@ -28,7 +28,7 @@ class PaymentController {
             });
         }
     }
-    
+
     // Get all Payments
     static async getAllPayments(req, res) {
         try {
@@ -43,31 +43,30 @@ class PaymentController {
         }
     }
 
-        static async getAllPaymentForUser(req, res) {
-            const { id} = req.body;
-    
-            try {
-                // Fetch challenges where the user is the creator or joiner
-                const payemnts = await Payment.findAll({
-                    where: {
-                        [Op.or]: [{ user_id: id }],
-                    }
-                });
-    
-                res.json({
-                    success: true,
-                    message: 'Payements fetched successfully',
-                    data: payemnts,
-                });
-            } catch (error) {
-                console.error(error);
-                res.status(500).json({
-                    success: false,
-                    message: 'Internal Server Error',
-                });
-            }
+    // Fetch payment for the user
+    static async getAllPaymentForUser(req, res) {
+        const { id } = req.body;
+        try {
+            const payemnts = await Payment.findAll({
+                where: {
+                    [Op.or]: [{ user_id: id }],
+                }
+            });
+            res.json({
+                success: true,
+                message: 'Payements fetched successfully',
+                data: payemnts,
+            });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({
+                success: false,
+                message: 'Internal Server Error',
+            });
         }
-            // Get a specific payment by Id
+    }
+
+    // Get a specific payment by Id
     static async getPaymentById(req, res) {
         const { id } = req.params;
         try {
@@ -93,16 +92,15 @@ class PaymentController {
             });
         }
     }
-    
-    // Update a user by Id
+
+    // Update a payment by Id
     static async updatePaymentById(req, res) {
-        const { id,  updated_by } = req.body;
+        const { id } = req.body;
         try {
-            const payment = await Payment.findOne({ 
-                where: { 
-                    id: id,
-                    updated_by: updated_by
-                } 
+            const payment = await Payment.findOne({
+                where: {
+                    id: id
+                }
             });
             if (payment) {
                 await payment.update(req.body);
@@ -124,8 +122,8 @@ class PaymentController {
             });
         }
     }
-    
-    // Delete a Payment by Id
+
+    // Delete a payment by Id
     static async deletePaymentById(req, res) {
         const { id } = req.body;
         console.log(req.body)
