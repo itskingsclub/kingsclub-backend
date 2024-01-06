@@ -186,6 +186,42 @@ class PaymentController {
         }
     }
 
+    // Create a deposit payment
+    static async createDeposit(req, res) {
+        const { user_id, amount } = req.body;
+        try {
+            const user = await User.findOne({ where: { id: user_id } });
+            if (!user) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'User not found',
+                });
+            } else {
+                const payment = await PaymentService.createPayment({ ...req.body, type: 'Deposit' });
+                const newTotalCoin = parseFloat(user.total_coin) + amount;
+                user.total_coin = newTotalCoin;
+                await user.save();
+                if (payment?.success) {
+                    res.status(200).json({
+                        success: true,
+                        message: "Coin deposit successfully",
+                    });
+                }
+                else {
+                    res.status(500).json({
+                        success: false,
+                        message: 'Error depositing coin'
+                    });
+                }
+            }
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: "Internal Server Error",
+            });
+        }
+    }
+
 }
 
 module.exports = PaymentController;

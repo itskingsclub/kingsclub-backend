@@ -2,10 +2,9 @@ const Payment = require('../models/Payment')
 
 class PaymentService {
     static async createPayment(payload) {
-        console.log("PV payload", payload)
+        const { user_id } = payload;
         try {
-            console.log("PV", { ...payload, payment_mode: "Upi", payment_status: "Sucessfull" })
-            const newPayment = await Payment.create({ ...payload, payment_mode: "Upi", payment_status: "Sucessfull" });
+            const newPayment = await Payment.create({ ...payload, payment_mode: "Upi", payment_status: "Sucessfull", updated_by: user_id });
 
             if (newPayment) {
                 return {
