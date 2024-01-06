@@ -1,31 +1,32 @@
 const Payment = require('../models/Payment')
 const User = require('../models/User');
 const { Op } = require("sequelize");
+const PaymentService = require("../services/PaymentService");
 
 class PaymentController {
     // Create a new payment
-    static async createPayment(req, res) {
-        const { user_id } = req.body;
+    static async createPayment(payload) {
+        console.log("PV", { ...payload, payment_mode: "Upi", payment_status: "Sucessfull" })
         try {
-            const user = await User.findOne({ where: { id: user_id } });
-            if (user) {
-                const newPayment = await Payment.create({ ...req.body, updated_by: user_id, payment_mode: "Upi", payment_status: "Sucessfull", type: 'Withdraw' });
-                res.status(201).json({
+            console.log("PV", { ...payload, payment_mode: "Upi", payment_status: "Sucessfull" })
+            const newPayment = await Payment.create({ ...payload, payment_mode: "Upi", payment_status: "Sucessfull" });
+
+            if (newPayment) {
+                return {
                     success: true,
                     message: "Payment created successfully",
                     data: newPayment
-                });
-            } else {
-                res.status(404).json({
-                    success: false,
-                    message: 'User not found'
-                });
+                }
+            }
+            return {
+                success: false,
+                message: "Error creting payment"
             }
         } catch (error) {
-            res.status(500).json({
+            return {
                 success: false,
                 message: "Internal Server Error",
-            });
+            }
         }
     }
 
@@ -148,6 +149,43 @@ class PaymentController {
             });
         }
     }
+
+    // Create a withdrawal payment
+    static async createWithdrawal(req, res) {
+        const { user_id, amount } = req.body;
+
+        try {
+            const user = await User.findOne({ where: { id: user_id } });
+            if (!user || user?.dataValues?.total_coin < amount) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'User does not have enough coins to withdrawal',
+                });
+            } else {
+                const payment = await PaymentService.createPayment({ ...req.body, type: 'Withdraw' });
+                user.total_coin -= amount;
+                await user.save();
+                if (payment?.success) {
+                    res.status(200).json({
+                        success: true,
+                        message: "Coin withdrawal successfully",
+                    });
+                }
+                else {
+                    res.status(500).json({
+                        success: false,
+                        message: 'Error withdrawing coin'
+                    });
+                }
+            }
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: "Internal Server Error",
+            });
+        }
+    }
+
 }
 
 module.exports = PaymentController;
