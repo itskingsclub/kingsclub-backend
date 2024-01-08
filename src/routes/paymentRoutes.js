@@ -10,5 +10,7 @@ router.get('/:id', PaymentController.getPaymentById);
 router.get('/', PaymentController.getAllPayments);
 router.put('/update', PaymentController.updatePaymentById);
 router.delete('/delete', PaymentController.deletePaymentById);
+router.post('/withdrawal', PaymentController.createWithdrawal);
+router.post('/deposit', PaymentController.createDeposit);
 
 module.exports = router;

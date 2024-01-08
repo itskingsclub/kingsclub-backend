@@ -35,7 +35,7 @@ const User = sequelize.define('User', {
         type: DataTypes.STRING(45),
     },
     total_coin: {
-        type: DataTypes.STRING(45),
+        type: DataTypes.FLOAT,
     },
 });
 
