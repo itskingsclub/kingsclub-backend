@@ -79,7 +79,6 @@ class UserController {
     // Update a user by Id
     static async updateUserById(req, res) {
         const { id } = req.body;
-        console.log("PV", req.body)
         try {
             const [updatedRowsCount] = await User.update(req.body, { where: { id } });
             if (updatedRowsCount > 0) {
@@ -168,7 +167,6 @@ class UserController {
             const user = await User.findOne({ where: { mobile } });
             if (user) {
                 const verifyOTP = await OtpService.verifyOTP(mobile, pin);
-                console.log("PV ", verifyOTP)
                 if (verifyOTP?.success) {
                     res.status(200).json({
                         success: true,

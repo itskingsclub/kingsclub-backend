@@ -6,11 +6,8 @@ const PaymentService = require("../services/PaymentService");
 class PaymentController {
     // Create a new payment
     static async createPayment(payload) {
-        console.log("PV", { ...payload, payment_mode: "Upi", payment_status: "Sucessfull" })
         try {
-            console.log("PV", { ...payload, payment_mode: "Upi", payment_status: "Sucessfull" })
             const newPayment = await Payment.create({ ...payload, payment_mode: "Upi", payment_status: "Sucessfull" });
-
             if (newPayment) {
                 return {
                     success: true,
