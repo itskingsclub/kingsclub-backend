@@ -14,7 +14,6 @@ const User = sequelize.define('User', {
     },
     email: {
         type: DataTypes.STRING(45),
-        allowNull: false,
     },
     mobile: {
         type: DataTypes.STRING(45),
@@ -36,6 +35,9 @@ const User = sequelize.define('User', {
     },
     total_coin: {
         type: DataTypes.FLOAT,
+    },
+    profile: {
+        type: DataTypes.STRING,
     },
 });
 

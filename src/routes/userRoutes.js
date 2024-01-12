@@ -1,10 +1,11 @@
 const express = require('express');
 const UserController = require('../controllers/UserController');
 const { verifyToken } = require('../utils/authUtils');
+const uploadMiddleware = require('../middleware/uploadMiddleware');
 const router = express.Router();
 
 // Create a new user
-router.post('/register', UserController.createUser);
+router.post('/register', uploadMiddleware('profile'), UserController.createUser);
 
 // Get all user
 router.get('/all', UserController.getAllUsers);
@@ -13,7 +14,7 @@ router.get('/all', UserController.getAllUsers);
 router.get('/:id', UserController.getUserById);
 
 // Update a user by ID
-router.put('/update', UserController.updateUserById);
+router.put('/update', uploadMiddleware('profile'), UserController.updateUserById);
 
 // Delete a user by ID
 router.delete('/delete', UserController.deleteUserById);

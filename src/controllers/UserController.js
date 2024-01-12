@@ -12,7 +12,7 @@ class UserController {
                     message: "User already exists, please login",
                 });
             } else {
-                const newUser = await User.create({ ...req.body, total_coin: 500 });
+                const newUser = await User.create({ ...req.body, total_coin: 500, profile: req.file ? req.file.filename : null });
                 const sendOtp = await OtpService.sendOtp(mobile);
                 if (sendOtp?.success) {
                     res.status(200).json({
@@ -80,7 +80,7 @@ class UserController {
     static async updateUserById(req, res) {
         const { id } = req.body;
         try {
-            const [updatedRowsCount] = await User.update(req.body, { where: { id } });
+            const [updatedRowsCount] = await User.update({ ...req.body, profile: req.file ? req.file.filename : null }, { where: { id } });
             if (updatedRowsCount > 0) {
                 res.status(200).json({
                     success: true,

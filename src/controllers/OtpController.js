@@ -64,7 +64,6 @@ class OtpController {
                         }
                     }
                     else {
-                        console.log("PV 1")
                         const deletedRowCount = await Otp.destroy({ where: { mobile } });
                         if (deletedRowCount > 0) {
                             const authToken = generateAuthToken(mobile);
