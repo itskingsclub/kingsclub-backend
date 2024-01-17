@@ -31,6 +31,12 @@ const Challenge = sequelize.define('Challenge', {
     joiner_result: {
         type: DataTypes.ENUM('Waiting', 'Win', 'Lose', 'Cancel', 'Fraud'),
     },
+    creator_result_image: {
+        type: DataTypes.STRING,
+    },
+    joiner_result_image: {
+        type: DataTypes.STRING,
+    },
     challenge_status: {
         type: DataTypes.ENUM('Waiting', 'Processing', 'Playing', 'Clear', 'Review', 'Fraud', 'Cancel'),
         allowNull: false,

@@ -229,7 +229,7 @@ class ChallengeController {
                 if (creator && creator_result) {
                     if (creator == _creator) {
                         const status = getChallengeStatus(creator_result, _joiner_result);
-                        const [updatedRowsCount] = await Challenge.update({ challenge_status: status, creator_result, updated_by }, { where: { id } });
+                        const [updatedRowsCount] = await Challenge.update({ challenge_status: status, creator_result, updated_by, creator_result_image: req.file ? req.file.filename : null, joiner_result_image: req.file ? req.file.filename : null }, { where: { id } });
                         if (updatedRowsCount > 0) {
                             res.status(200).json({
                                 success: true,

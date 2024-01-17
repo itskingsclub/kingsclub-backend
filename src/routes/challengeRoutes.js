@@ -1,6 +1,7 @@
 const express = require('express');
 const ChallengeController = require('../controllers/ChallengeController');
 const { verifyToken } = require('../utils/authUtils');
+const uploadMiddleware = require('../middleware/uploadMiddleware');
 const router = express.Router()
 
 // Route for creating a challenge
@@ -22,6 +23,6 @@ router.delete('/delete', ChallengeController.deleteChallengeById);
 router.post('/my-challenges', ChallengeController.getAllChallengesForUser);
 
 // Update a challenge result
-router.put('/update-result', ChallengeController.updateChallengeResult);
+router.put('/update-result', uploadMiddleware(['creator_result_image', 'joiner_result_image']), ChallengeController.updateChallengeResult);
 
 module.exports = router;
