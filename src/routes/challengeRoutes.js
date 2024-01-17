@@ -23,6 +23,8 @@ router.delete('/delete', ChallengeController.deleteChallengeById);
 router.post('/my-challenges', ChallengeController.getAllChallengesForUser);
 
 // Update a challenge result
-router.put('/update-result', uploadMiddleware(['creator_result_image', 'joiner_result_image']), ChallengeController.updateChallengeResult);
+router.put('/update-result', uploadMiddleware([
+    { name: 'creator_result_image', maxCount: 1 },
+    { name: 'joiner_result_image', maxCount: 1 }]), ChallengeController.updateChallengeResult);
 
 module.exports = router;

@@ -80,7 +80,7 @@ class UserController {
     static async updateUserById(req, res) {
         const { id } = req.body;
         try {
-            const [updatedRowsCount] = await User.update({ ...req.body, profile: req.file ? req.file.filename : null }, { where: { id } });
+            const [updatedRowsCount] = await User.update({ ...req.body, profile: req?.files?.profile ? req?.files?.profile[0]?.filename : null }, { where: { id } });
             if (updatedRowsCount > 0) {
                 res.status(200).json({
                     success: true,
