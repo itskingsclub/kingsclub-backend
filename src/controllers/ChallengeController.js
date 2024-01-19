@@ -221,15 +221,27 @@ class ChallengeController {
 
     // Update a Challenge result
     static async updateChallengeResult(req, res) {
-        const { id, creator, joiner, creator_result, joiner_result, updated_by } = req.body;
+        const { id, creator, joiner, creator_result, joiner_result, updated_by, amount } = req.body;
         try {
             const challenge = await Challenge.findOne({ where: { id } });
+            console.log("challenge_status", challenge.challenge_status)
             if (challenge) {
                 const { creator: _creator, joiner: _joiner, creator_result: _creator_result, joiner_result: _joiner_result, amount } = challenge?.dataValues;
                 if (creator && creator_result) {
                     if (creator == _creator) {
+                        const creatorUser = await User.findOne({ where: { id: challenge.creator } });
+                        const joinerUser = await User.findOne({ where: { id: challenge.joiner } });
                         const status = getChallengeStatus(creator_result, _joiner_result);
-                        const [updatedRowsCount] = await Challenge.update({ challenge_status: status, creator_result, updated_by }, { where: { id } });
+                        const [updatedRowsCount] = await Challenge.update({ challenge_status: status, creator_result, updated_by, creator_result_image: req.files.creator_result_image ? req.files.creator_result_image[0].filename : null }, { where: { id } });
+                        if(status === "Clear"){
+                        if(creator_result === "Win"){
+                            creatorUser.total_coin += ((challenge.amount - challenge.amount * 1/10) * 2);
+                            await creatorUser.save();
+                        } else{
+                            joinerUser.total_coin += ((challenge.amount - challenge.amount * 1/10) * 2);
+                            await joinerUser.save();
+                        }
+                        }
                         if (updatedRowsCount > 0) {
                             res.status(200).json({
                                 success: true,
@@ -251,8 +263,19 @@ class ChallengeController {
                 }
                 else if (joiner && joiner_result) {
                     if (joiner == _joiner) {
+                        const joinerUser = await User.findOne({ where: { id: challenge.joiner } });
+                        const creatorUser = await User.findOne({ where: { id: challenge.creator } });
                         const status = getChallengeStatus(_creator_result, joiner_result);
-                        const [updatedRowsCount] = await Challenge.update({ challenge_status: status, joiner_result, updated_by }, { where: { id } });
+                        const [updatedRowsCount] = await Challenge.update({ challenge_status: status, joiner_result, updated_by, joiner_result_image: req.files.joiner_result_image ? req.files.joiner_result_image[0].filename : null }, { where: { id } });
+                        if(status === "Clear"){
+                        if(joiner_result === "Win"){
+                                joinerUser.total_coin += ((challenge.amount - challenge.amount * 1/10) * 2);
+                                await joinerUser.save();
+                            } else{
+                                creatorUser.total_coin += ((challenge.amount - challenge.amount * 1/10) * 2);
+                                await creatorUser.save();
+                            }
+                        }
                         if (updatedRowsCount > 0) {
                             res.status(200).json({
                                 success: true,

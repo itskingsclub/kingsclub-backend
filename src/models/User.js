@@ -39,6 +39,18 @@ const User = sequelize.define('User', {
     profile: {
         type: DataTypes.STRING,
     },
+    date_of_birth: {
+        type: DataTypes.STRING,
+    },
+    address: {
+        type: DataTypes.STRING,
+    },
+    city: {
+        type: DataTypes.STRING(45),
+    },
+    state: {
+        type: DataTypes.STRING(45),
+    },
 });
 
 module.exports = User;

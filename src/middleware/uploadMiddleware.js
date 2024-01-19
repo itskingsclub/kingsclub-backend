@@ -34,9 +34,9 @@ const upload = multer({
 });
 
 // Middleware function for handling file uploads
-const uploadMiddleware = (fieldName) => {
+const uploadMiddleware = (fields) => {
     return (req, res, next) => {
-        upload.single(fieldName)(req, res, (err) => {
+        upload.fields(fields)(req, res, (err) => {
             if (err instanceof multer.MulterError) {
                 // A Multer error occurred (e.g., file size exceeded)
                 return res.status(400).json({

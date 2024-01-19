@@ -14,7 +14,7 @@ router.get('/all', UserController.getAllUsers);
 router.get('/:id', UserController.getUserById);
 
 // Update a user by ID
-router.put('/update', uploadMiddleware('profile'), UserController.updateUserById);
+router.put('/update', uploadMiddleware([{ name: 'profile', maxCount: 1 }]), UserController.updateUserById);
 
 // Delete a user by ID
 router.delete('/delete', UserController.deleteUserById);
