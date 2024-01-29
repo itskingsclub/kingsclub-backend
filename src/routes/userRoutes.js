@@ -5,7 +5,7 @@ const uploadMiddleware = require('../middleware/uploadMiddleware');
 const router = express.Router();
 
 // Create a new user
-router.post('/register', uploadMiddleware('profile'), UserController.createUser);
+router.post('/register', uploadMiddleware([{ name: 'profile', maxCount: 1 }]), UserController.createUser);
 
 // Get all user
 router.get('/all', UserController.getAllUsers);
