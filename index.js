@@ -13,6 +13,8 @@ const PORT = process.env.PORT || 3000;
 sequelize.sync().then(() => {
   console.log('Database and tables created!');
 });
+// Serve images from the 'upload' folder
+app.use('/upload', express.static(path.join(__dirname, 'upload')));
 
 app.use(cors());
 app.use('/upload', express.static(path.join(__dirname, 'upload')));
