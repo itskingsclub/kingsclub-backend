@@ -40,8 +40,9 @@ class ChallengeController {
     // Get all Challenges
     static async getAllChallenges(req, res) {
         try {
+            const { offset, limit } = req.body;
             const expiry = new Date(Date.now() + 5 * 60 * 1000);
-            const Challenges = await Challenge.findAll({
+            const { count, rows: Challenges } = await Challenge.findAndCountAll({
                 where: {
                     expiry_time: {
                         [Op.gt]: expiry,
@@ -52,12 +53,17 @@ class ChallengeController {
                     { model: User, as: 'joinerUser' },
                 ],
                 order: [['updatedAt', 'DESC']],
+                offset,
+                limit,
             });
 
             res.status(200).json({
                 success: true,
                 message: "All Challenge fetched successfully",
-                data: Challenges
+                data: {
+                    challenges: Challenges,
+                    totalCount: count,
+                },
             });
         } catch (error) {
             res.status(500).json({ success: false, error: 'Error fetching Challenges' });
