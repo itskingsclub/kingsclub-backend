@@ -5,7 +5,7 @@ const challengeRoutes = require('./src/routes/challengeRoutes')
 const paymentRoutes = require('./src/routes/paymentRoutes')
 const sequelize = require('./src/config/db');
 const path = require('path');
-
+const cors = require('cors');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
