@@ -11,7 +11,7 @@ class ChallengeController {
         const expiry_time = new Date(Date.now() + 30 * 60 * 1000); // Set Challenge expiry to 30 minutes from now
         try {
             const creatorUser = await User.findOne({ where: { id: creator } });
-            if (!creatorUser || creatorUser?.dataValues?.total_coin < amount) {
+            if (!creatorUser || creatorUser?.dataValues?.game_coin < amount) {
                 return res.status(400).json({
                     success: false,
                     message: 'Creator does not have enough coins for the challenge',
@@ -20,7 +20,7 @@ class ChallengeController {
             else {
                 const newChallenge = await Challenge.create({ ...req.body, expiry_time, creator_result: 'Waiting', joiner_result: 'Waiting', challenge_status: 'Waiting', joiner_result: 'Waiting', updated_by: creator });
 
-                creatorUser.total_coin -= amount;
+                creatorUser.game_coin -= amount;
                 await creatorUser.save();
 
                 res.status(201).json({
@@ -106,7 +106,7 @@ class ChallengeController {
                 if (joiner) {
                     if (creator != joiner) {
                         const joinerUser = await User.findOne({ where: { id: joiner } });
-                        if (!joinerUser || joinerUser?.dataValues?.total_coin < amount) {
+                        if (!joinerUser || joinerUser?.dataValues?.game_coin < amount) {
                             return res.status(400).json({
                                 success: false,
                                 message: 'Joiner does not have enough coins for the challenge',
@@ -115,7 +115,7 @@ class ChallengeController {
                         else {
                             const [updatedRowsCount] = await Challenge.update(req.body, { where: { id } });
                             if (updatedRowsCount > 0) {
-                                joinerUser.total_coin -= amount;
+                                joinerUser.game_coin -= amount;
                                 await joinerUser.save();
                                 res.status(200).json({
                                     success: true,
@@ -237,9 +237,19 @@ class ChallengeController {
                         if(creator_result === "Win"){
                             creatorUser.win_coin += ((challenge.amount - challenge.amount * 10 / 100) * 2);
                             await creatorUser.save();
+                            if (creatorUser.referral_code) {
+                                const referralUser = await User.findOne({ where: { invite_code: creatorUser.referral_code } });
+                                referralUser.refer_coin += (challenge.amount * 5 / 100);
+                                await referralUser.save();
+                            }
                         } else{
                             joinerUser.win_coin += ((challenge.amount - challenge.amount * 10 / 100) * 2);
                             await joinerUser.save();
+                            if (joinerUser.referral_code) {
+                                const referralUser = await User.findOne({ where: { invite_code: joinerUser.referral_code } });
+                                referralUser.refer_coin += (challenge.amount * 5 / 100);
+                                await referralUser.save();
+                            }
                         }
                         }
                         if (updatedRowsCount > 0) {
@@ -271,9 +281,19 @@ class ChallengeController {
                         if(joiner_result === "Win"){
                             joinerUser.win_coin += ((challenge.amount - challenge.amount * 10 / 100) * 2);
                                 await joinerUser.save();
+                            if (joinerUser.referral_code) {
+                                const referralUser = await User.findOne({ where: { invite_code: joinerUser.referral_code } });
+                                referralUser.refer_coin += (challenge.amount * 5 / 100);
+                                await referralUser.save();
+                            }
                             } else{
                             creatorUser.win_coin += ((challenge.amount - challenge.amount * 10 / 100) * 2);
                                 await creatorUser.save();
+                            if (creatorUser.referral_code) {
+                                const referralUser = await User.findOne({ where: { invite_code: creatorUser.referral_code } });
+                                referralUser.refer_coin += (challenge.amount * 5 / 100);
+                                await referralUser.save();
+                            }
                             }
                         }
                         if (updatedRowsCount > 0) {
