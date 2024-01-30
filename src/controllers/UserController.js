@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const OtpService = require("../services/OtpService");
+const { generateInviteCode } = require("../utils/numberUtils");
 class UserController {
     // Create a new user
     static async createUser(req, res) {
@@ -12,7 +13,7 @@ class UserController {
                     message: "User already exists, please login",
                 });
             } else {
-                const newUser = await User.create({ ...req.body, total_coin: 500, profile: req.file ? req.file.filename : null });
+                const newUser = await User.create({ ...req.body, invite_code: generateInviteCode(), game_coin: 500, profile: req.file ? req.file.filename : null });
                 const sendOtp = await OtpService.sendOtp(mobile);
                 if (sendOtp?.success) {
                     res.status(200).json({

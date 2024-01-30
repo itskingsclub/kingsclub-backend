@@ -33,7 +33,13 @@ const User = sequelize.define('User', {
     block: {
         type: DataTypes.STRING(45),
     },
-    total_coin: {
+    game_coin: {
+        type: DataTypes.FLOAT,
+    },
+    win_coin: {
+        type: DataTypes.FLOAT,
+    },
+    refer_coin: {
         type: DataTypes.FLOAT,
     },
     profile: {
