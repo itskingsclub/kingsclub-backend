@@ -51,6 +51,7 @@ class ChallengeController {
                     { model: User, as: 'creatorUser' },
                     { model: User, as: 'joinerUser' },
                 ],
+                order: [['updatedAt', 'DESC']],
             });
 
             res.status(200).json({
@@ -203,6 +204,7 @@ class ChallengeController {
                     { model: User, as: 'creatorUser' },
                     { model: User, as: 'joinerUser' },
                 ],
+                order: [['updatedAt', 'DESC']],
             });
 
             res.json({
