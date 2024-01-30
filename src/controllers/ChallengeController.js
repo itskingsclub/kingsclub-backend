@@ -235,10 +235,10 @@ class ChallengeController {
                         const [updatedRowsCount] = await Challenge.update({ challenge_status: status, creator_result, updated_by, creator_result_image: req.files.creator_result_image ? req.files.creator_result_image[0].filename : null }, { where: { id } });
                         if(status === "Clear"){
                         if(creator_result === "Win"){
-                            creatorUser.total_coin += ((challenge.amount - challenge.amount * 1/10) * 2);
+                            creatorUser.win_coin += ((challenge.amount - challenge.amount * 10 / 100) * 2);
                             await creatorUser.save();
                         } else{
-                            joinerUser.total_coin += ((challenge.amount - challenge.amount * 1/10) * 2);
+                            joinerUser.win_coin += ((challenge.amount - challenge.amount * 10 / 100) * 2);
                             await joinerUser.save();
                         }
                         }
@@ -269,10 +269,10 @@ class ChallengeController {
                         const [updatedRowsCount] = await Challenge.update({ challenge_status: status, joiner_result, updated_by, joiner_result_image: req.files.joiner_result_image ? req.files.joiner_result_image[0].filename : null }, { where: { id } });
                         if(status === "Clear"){
                         if(joiner_result === "Win"){
-                                joinerUser.total_coin += ((challenge.amount - challenge.amount * 1/10) * 2);
+                            joinerUser.win_coin += ((challenge.amount - challenge.amount * 10 / 100) * 2);
                                 await joinerUser.save();
                             } else{
-                                creatorUser.total_coin += ((challenge.amount - challenge.amount * 1/10) * 2);
+                            creatorUser.win_coin += ((challenge.amount - challenge.amount * 10 / 100) * 2);
                                 await creatorUser.save();
                             }
                         }
