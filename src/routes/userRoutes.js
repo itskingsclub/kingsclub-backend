@@ -2,13 +2,14 @@ const express = require('express');
 const UserController = require('../controllers/UserController');
 const { verifyToken } = require('../utils/authUtils');
 const uploadMiddleware = require('../middleware/uploadMiddleware');
+const paginationMiddleware = require('../middleware/paginationMiddleware');
 const router = express.Router();
 
 // Create a new user
 router.post('/register', uploadMiddleware([{ name: 'profile', maxCount: 1 }]), UserController.createUser);
 
 // Get all user
-router.get('/all', UserController.getAllUsers);
+router.get('/', paginationMiddleware, UserController.getAllUsers);
 
 // Get a specific user by ID
 router.get('/:id', UserController.getUserById);

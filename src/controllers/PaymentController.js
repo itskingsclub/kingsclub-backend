@@ -30,11 +30,19 @@ class PaymentController {
     // Get all Payments
     static async getAllPayments(req, res) {
         try {
-            const Payments = await Payment.findAll({ order: [['updatedAt', 'DESC']] });
+            const { offset, limit, sort, order } = req.body;
+            const { count, rows: Payments } = await Payment.findAndCountAll({
+                order: [[sort || 'updatedAt', order || 'DESC']],
+                offset,
+                limit,
+            });
             res.status(200).json({
                 success: true,
                 message: "All Payments fetched successfully",
-                data: Payments
+                data: {
+                    payments: Payments,
+                    totalCount: count,
+                },
             });
         } catch (error) {
             res.status(500).json({ success: false, error: 'Error fetching Payments' });

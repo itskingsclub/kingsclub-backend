@@ -40,11 +40,19 @@ class UserController {
     // Get all users
     static async getAllUsers(req, res) {
         try {
-            const users = await User.findAll();
+            const { offset, limit, sort, order } = req.body;
+            const { count, rows: Users } = await User.findAndCountAll({
+                order: [[sort || 'updatedAt', order || 'DESC']],
+                offset,
+                limit,
+            });
             res.status(200).json({
                 success: true,
                 message: "All user fetched successfully",
-                data: users
+                data: {
+                    users: Users,
+                    totalCount: count,
+                },
             });
         } catch (error) {
             res.status(500).json({ success: false, error: 'Error fetching users' });
