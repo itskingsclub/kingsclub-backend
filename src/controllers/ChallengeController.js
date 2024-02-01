@@ -40,7 +40,7 @@ class ChallengeController {
     // Get all Challenges
     static async getAllChallenges(req, res) {
         try {
-            const { offset, limit, sort, order } = req.body;
+            const { offset, limit, sort, order } = req?.query;
             const expiry = new Date(Date.now() + 5 * 60 * 1000);
             const { count, rows: Challenges } = await Challenge.findAndCountAll({
                 // where: {
@@ -53,8 +53,8 @@ class ChallengeController {
                     { model: User, as: 'joinerUser' },
                 ],
                 order: [[sort || 'updatedAt', order || 'DESC']],
-                offset,
-                limit,
+                offset: Number(offset),
+                limit: Number(limit),
             });
 
             res.status(200).json({
