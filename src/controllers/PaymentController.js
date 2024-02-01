@@ -30,11 +30,11 @@ class PaymentController {
     // Get all Payments
     static async getAllPayments(req, res) {
         try {
-            const { offset, limit, sort, order } = req.body;
+            const { offset, limit, sort, order } = req?.query;
             const { count, rows: Payments } = await Payment.findAndCountAll({
                 order: [[sort || 'updatedAt', order || 'DESC']],
-                offset,
-                limit,
+                offset: Number(offset),
+                limit: Number(limit),
             });
             res.status(200).json({
                 success: true,
