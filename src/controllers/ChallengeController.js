@@ -3,6 +3,7 @@ const User = require('../models/User');
 const OtpService = require("../services/OtpService");
 const { Op } = require("sequelize");
 const { getChallengeStatus } = require("../utils/resultUtils");
+const { calculateCoinDeductions } = require("../utils/numberUtils");
 
 class ChallengeController {
     // Create a new Challenge
@@ -11,7 +12,9 @@ class ChallengeController {
         const expiry_time = new Date(Date.now() + 30 * 60 * 1000); // Set Challenge expiry to 30 minutes from now
         try {
             const creatorUser = await User.findOne({ where: { id: creator } });
-            if (!creatorUser || creatorUser?.dataValues?.game_coin < amount) {
+            const deductions = calculateCoinDeductions(creatorUser?.game_coin, creatorUser?.win_coin, creatorUser?.refer_coin, amount)
+
+            if (!creatorUser || deductions?.remainingCoinRequired > 0) {
                 return res.status(400).json({
                     success: false,
                     message: 'Creator does not have enough coins for the challenge',
@@ -20,7 +23,9 @@ class ChallengeController {
             else {
                 const newChallenge = await Challenge.create({ ...req.body, expiry_time, creator_result: 'Waiting', joiner_result: 'Waiting', challenge_status: 'Waiting', joiner_result: 'Waiting', updated_by: creator });
 
-                creatorUser.game_coin -= amount;
+                creatorUser.game_coin -= deductions?.gameCoinDeduction;
+                creatorUser.win_coin -= deductions?.winCoinDeduction;
+                creatorUser.refer_coin -= deductions?.referCoinDeduction;
                 await creatorUser.save();
 
                 res.status(201).json({
@@ -113,7 +118,9 @@ class ChallengeController {
                 if (joiner) {
                     if (creator != joiner) {
                         const joinerUser = await User.findOne({ where: { id: joiner } });
-                        if (!joinerUser || joinerUser?.dataValues?.game_coin < amount) {
+                        const deductions = calculateCoinDeductions(joinerUser?.game_coin, joinerUser?.win_coin, joinerUser?.refer_coin, amount)
+
+                        if (!joinerUser || deductions?.remainingCoinRequired > 0) {
                             return res.status(400).json({
                                 success: false,
                                 message: 'Joiner does not have enough coins for the challenge',
@@ -122,7 +129,9 @@ class ChallengeController {
                         else {
                             const [updatedRowsCount] = await Challenge.update(req.body, { where: { id } });
                             if (updatedRowsCount > 0) {
-                                joinerUser.game_coin -= amount;
+                                joinerUser.game_coin -= deductions?.gameCoinDeduction;
+                                joinerUser.win_coin -= deductions?.winCoinDeduction;
+                                joinerUser.refer_coin -= deductions?.referCoinDeduction;
                                 await joinerUser.save();
                                 res.status(200).json({
                                     success: true,
