@@ -58,8 +58,12 @@ class ChallengeController {
                     { model: User, as: 'joinerUser' },
                 ],
                 order: [[sort || 'updatedAt', order || 'DESC']],
-                offset: Number(offset),
-                limit: Number(limit),
+                ...(offset && {
+                    offset: Number(offset),
+                }),
+                ...(limit && {
+                    limit: Number(limit),
+                }),
             });
 
             res.status(200).json({
@@ -207,25 +211,32 @@ class ChallengeController {
     }
 
     static async getAllChallengesForUser(req, res) {
-        const { id } = req.body;
-
+        const { id, offset, limit, sort, order } = req?.query;
         try {
-            // Fetch challenges where the user is the creator or joiner
-            const challenges = await Challenge.findAll({
+            const { count, rows: Challenges } = await Challenge.findAndCountAll({
                 where: {
-                    [Op.or]: [{ creator: id }, { joiner: id }],
+                    [Op.or]: [{ creator: Number(id) }, { joiner: Number(id) }],
                 },
                 include: [
                     { model: User, as: 'creatorUser' },
                     { model: User, as: 'joinerUser' },
                 ],
-                order: [['updatedAt', 'DESC']],
+                order: [[sort || 'updatedAt', order || 'DESC']],
+                ...(offset && {
+                    offset: Number(offset),
+                }),
+                ...(limit && {
+                    limit: Number(limit),
+                }),
             });
 
             res.json({
                 success: true,
                 message: 'Challenges fetched successfully',
-                data: challenges,
+                data: {
+                    challenges: Challenges,
+                    totalCount: count,
+                },
             });
         } catch (error) {
             console.error(error);
