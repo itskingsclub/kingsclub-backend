@@ -33,8 +33,12 @@ class PaymentController {
             const { offset, limit, sort, order } = req?.query;
             const { count, rows: Payments } = await Payment.findAndCountAll({
                 order: [[sort || 'updatedAt', order || 'DESC']],
-                offset: Number(offset),
-                limit: Number(limit),
+                ...(offset && {
+                    offset: Number(offset),
+                }),
+                ...(limit && {
+                    limit: Number(limit),
+                }),
             });
             res.status(200).json({
                 success: true,
@@ -51,17 +55,27 @@ class PaymentController {
 
     // Fetch payment for the user
     static async getAllPaymentForUser(req, res) {
-        const { id } = req.body;
+        const { id, offset, limit, sort, order } = req?.query;
         try {
-            const payemnts = await Payment.findAll({
+            const { count, rows: Payemnts } = await Payment.findAndCountAll({
                 where: {
                     [Op.or]: [{ user_id: id }],
-                }
+                },
+                order: [[sort || 'updatedAt', order || 'DESC']],
+                ...(offset && {
+                    offset: Number(offset),
+                }),
+                ...(limit && {
+                    limit: Number(limit),
+                }),
             });
             res.json({
                 success: true,
                 message: 'Payements fetched successfully',
-                data: payemnts,
+                data: {
+                    payemnts: Payemnts,
+                    totalCount: count,
+                },
             });
         } catch (error) {
             console.error(error);

@@ -43,8 +43,12 @@ class UserController {
             const { offset, limit, sort, order } = req?.query;
             const { count, rows: Users } = await User.findAndCountAll({
                 order: [[sort || 'updatedAt', order || 'DESC']],
-                offset: Number(offset),
-                limit: Number(limit),
+                ...(offset && {
+                    offset: Number(offset),
+                }),
+                ...(limit && {
+                    limit: Number(limit),
+                }),
             });
             res.status(200).json({
                 success: true,
