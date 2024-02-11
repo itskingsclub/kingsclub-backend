@@ -215,11 +215,11 @@ class PaymentController {
                     message: 'User not found',
                 });
             } else {
-                const payment = await PaymentService.createPayment({ ...req.body, type: 'Deposit' });
-                const newTotalCoin = parseFloat(user.game_coin) + amount;
-                user.game_coin = newTotalCoin;
-                await user.save();
+                const payment = await PaymentService.createPayment({ ...req, type: 'Deposit' });
                 if (payment?.success) {
+                    const newTotalCoin = parseFloat(user.game_coin) + parseFloat(amount);
+                    user.game_coin = newTotalCoin;
+                    await user.save();
                     res.status(200).json({
                         success: true,
                         message: "Coin deposit successfully",

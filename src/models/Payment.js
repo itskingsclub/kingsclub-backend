@@ -37,6 +37,9 @@ const Payment = sequelize.define('Payment', {
     remark: {
         type: DataTypes.STRING(100),
     },
+    image: {
+        type: DataTypes.STRING,
+    },
     updated_by: {
         type: DataTypes.INTEGER,
         allowNull: false,
