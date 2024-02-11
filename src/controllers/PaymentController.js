@@ -146,7 +146,6 @@ class PaymentController {
     // Delete a payment by Id
     static async deletePaymentById(req, res) {
         const { id } = req.body;
-        console.log(req.body)
         try {
             const deletedRowCount = await Payment.destroy({ where: { id } });
             if (deletedRowCount > 0) {
@@ -175,14 +174,14 @@ class PaymentController {
 
         try {
             const user = await User.findOne({ where: { id: user_id } });
-            if (!user || user?.dataValues?.game_coin < amount) {
+            if (!user || user?.dataValues?.win_coin < amount) {
                 return res.status(400).json({
                     success: false,
                     message: 'User does not have enough coins to withdrawal',
                 });
             } else {
                 const payment = await PaymentService.createPayment({ ...req.body, type: 'Withdraw' });
-                user.game_coin -= amount;
+                user.win_coin -= amount;
                 await user.save();
                 if (payment?.success) {
                     res.status(200).json({

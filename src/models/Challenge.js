@@ -48,6 +48,9 @@ const Challenge = sequelize.define('Challenge', {
         type: DataTypes.FLOAT,
         allowNull: false,
     },
+    remark: {
+        type: DataTypes.STRING(100),
+    },
     expiry_time: {
         type: DataTypes.DATE,
         allowNull: false,
