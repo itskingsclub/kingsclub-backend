@@ -180,10 +180,10 @@ class PaymentController {
                     message: 'User does not have enough coins to withdrawal',
                 });
             } else {
-                const payment = await PaymentService.createPayment({ ...req.body, type: 'Withdraw' });
-                user.win_coin -= amount;
-                await user.save();
+                const payment = await PaymentService.createPayment({ ...req, type: 'Withdraw' });
                 if (payment?.success) {
+                    user.win_coin -= amount;
+                    await user.save();
                     res.status(200).json({
                         success: true,
                         message: "Coin withdrawal successfully",
