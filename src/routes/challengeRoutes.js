@@ -28,4 +28,7 @@ router.put('/update-result', uploadMiddleware([
     { name: 'creator_result_image', maxCount: 1 },
     { name: 'joiner_result_image', maxCount: 1 }]), ChallengeController.updateChallengeResult);
 
+// Get challenges for specific user by ID
+router.put('/clear-challenge', ChallengeController.clearChallenge);
+
 module.exports = router;

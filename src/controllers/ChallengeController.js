@@ -364,6 +364,47 @@ class ChallengeController {
         }
     }
 
+    // Clear a Challenge
+    static async clearChallenge(req, res) {
+        const { admin_id, id } = req.body;
+        try {
+            const user = await User.findOne({ where: { id: admin_id } });
+            if (user && user.admin) {
+                const challenge = await Challenge.findOne({ where: { id } });
+                if (challenge) {
+                    const [updatedRowsCount] = await Challenge.update(req.body, { where: { id } });
+                    if (updatedRowsCount > 0) {
+                        res.status(200).json({
+                            success: true,
+                            message: 'Challenge updated successfully'
+                        });
+                    } else {
+                        res.status(404).json({
+                            success: false,
+                            message: 'Error updating Challenge'
+                        });
+                    }
+                } else {
+                    res.status(404).json({
+                        success: false,
+                        message: 'Challenge not found'
+                    });
+                }
+            } else {
+                res.status(404).json({
+                    success: false,
+                    message: 'Not a valid admin'
+                });
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({
+                success: false,
+                message: 'Error updating challenge result'
+            });
+        }
+    }
+
 }
 
 module.exports = ChallengeController;

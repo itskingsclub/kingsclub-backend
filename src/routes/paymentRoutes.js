@@ -2,6 +2,7 @@ const express = require('express');
 const PaymentController = require('../controllers/PaymentController');
 const { verifyToken } = require('../utils/authUtils');
 const paginationMiddleware = require('../middleware/paginationMiddleware');
+const uploadMiddleware = require('../middleware/uploadMiddleware');
 const router = express.Router()
 
 // Route for creating a Payment
@@ -12,6 +13,6 @@ router.get('/', paginationMiddleware, PaymentController.getAllPayments);
 router.put('/update', PaymentController.updatePaymentById);
 router.delete('/delete', PaymentController.deletePaymentById);
 router.post('/withdrawal', PaymentController.createWithdrawal);
-router.post('/deposit', PaymentController.createDeposit);
+router.post('/deposit', uploadMiddleware([{ name: 'image', maxCount: 1 }]), PaymentController.createDeposit);
 
 module.exports = router;
