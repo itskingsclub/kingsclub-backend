@@ -12,7 +12,7 @@ router.get('/:id', PaymentController.getPaymentById);
 router.get('/', paginationMiddleware, PaymentController.getAllPayments);
 router.put('/update', PaymentController.updatePaymentById);
 router.delete('/delete', PaymentController.deletePaymentById);
-router.post('/withdrawal', PaymentController.createWithdrawal);
+router.post('/withdrawal', uploadMiddleware([{ name: 'image', maxCount: 1 }]), PaymentController.createWithdrawal);
 router.post('/deposit', uploadMiddleware([{ name: 'image', maxCount: 1 }]), PaymentController.createDeposit);
 
 module.exports = router;

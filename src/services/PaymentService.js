@@ -2,14 +2,20 @@ const Payment = require('../models/Payment')
 
 class PaymentService {
     static async createPayment(payload) {
+        const { user_id } = payload.body;
         try {
             const newPayment = await Payment.create({
                 ...payload?.body,
+                updated_by: user_id,
+                type: payload?.type,
+                payment_mode: "Admin",
                 payment_status: "Pending",
                 ...(payload?.files?.image[0]?.filename && {
                     image: payload?.files?.image[0]?.filename,
                 }),
             });
+
+
 
             if (newPayment) {
                 return {
