@@ -182,11 +182,11 @@ class PaymentController {
             } else {
                 const payment = await PaymentService.createPayment({ ...req, type: 'Withdraw' });
                 if (payment?.success) {
-                    user.win_coin -= amount;
-                    await user.save();
+                    // user.win_coin -= parseFloat(amount);
+                    // await user.save();
                     res.status(200).json({
                         success: true,
-                        message: "Coin withdrawal successfully",
+                        message: "Coin withdrawal requested",
                     });
                 }
                 else {
@@ -217,12 +217,12 @@ class PaymentController {
             } else {
                 const payment = await PaymentService.createPayment({ ...req, type: 'Deposit' });
                 if (payment?.success) {
-                    const newTotalCoin = parseFloat(user.game_coin) + parseFloat(amount);
-                    user.game_coin = newTotalCoin;
-                    await user.save();
+                    // const newTotalCoin = parseFloat(user.game_coin) + parseFloat(amount);
+                    // user.game_coin = newTotalCoin;
+                    // await user.save();
                     res.status(200).json({
                         success: true,
-                        message: "Coin deposit successfully",
+                        message: "Coin deposit requested",
                     });
                 }
                 else {

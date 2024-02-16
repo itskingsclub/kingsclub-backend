@@ -10,12 +10,10 @@ class PaymentService {
                 type: payload?.type,
                 payment_mode: "Admin",
                 payment_status: "Pending",
-                ...(payload?.files?.image[0]?.filename && {
+                ...(payload?.files?.image && {
                     image: payload?.files?.image[0]?.filename,
                 }),
             });
-
-
 
             if (newPayment) {
                 return {
