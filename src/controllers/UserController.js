@@ -96,9 +96,9 @@ class UserController {
             const [updatedRowsCount] = await User.update(
                 {
                     ...req.body,
-                    ...(req?.files?.profile[0]?.filename && {
+                    ...(req?.files?.profile && {
                         profile: req?.files?.profile[0]?.filename,
-                    }),
+                    })
                 }
                 , { where: { id } });
             if (updatedRowsCount > 0) {
@@ -116,7 +116,7 @@ class UserController {
             console.error(error);
             res.status(500).json({
                 success: false,
-                message: 'Error updating user'
+                message: 'Error updating user 1'
             });
         }
     }
