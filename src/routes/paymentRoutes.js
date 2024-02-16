@@ -1,18 +1,20 @@
 const express = require('express');
 const PaymentController = require('../controllers/PaymentController');
 const { verifyToken } = require('../utils/authUtils');
-const paginationMiddleware = require('../middleware/paginationMiddleware');
 const uploadMiddleware = require('../middleware/uploadMiddleware');
 const router = express.Router()
 
 // Route for creating a Payment
 router.post('/create', PaymentController.createPayment);
 router.post('/my-payments', PaymentController.getAllPaymentForUser);
+router.get('/all-withdraw', PaymentController.getAllWithdraw);
+router.get('/all-deposit', PaymentController.getAllDeposit);
 router.get('/:id', PaymentController.getPaymentById);
-router.get('/', paginationMiddleware, PaymentController.getAllPayments);
+router.get('/', PaymentController.getAllPayments);
 router.put('/update', PaymentController.updatePaymentById);
 router.delete('/delete', PaymentController.deletePaymentById);
-router.post('/withdrawal', uploadMiddleware([{ name: 'image', maxCount: 1 }]), PaymentController.createWithdrawal);
+router.post('/withdraw', uploadMiddleware([{ name: 'image', maxCount: 1 }]), PaymentController.createWithdraw);
 router.post('/deposit', uploadMiddleware([{ name: 'image', maxCount: 1 }]), PaymentController.createDeposit);
+
 
 module.exports = router;
