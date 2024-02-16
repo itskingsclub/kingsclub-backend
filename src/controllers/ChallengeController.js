@@ -261,24 +261,28 @@ class ChallengeController {
                         const joinerUser = await User.findOne({ where: { id: challenge.joiner } });
                         const status = getChallengeStatus(creator_result, _joiner_result);
                         const [updatedRowsCount] = await Challenge.update({ challenge_status: status, creator_result, updated_by, creator_result_image: req.files.creator_result_image ? req.files.creator_result_image[0].filename : null }, { where: { id } });
-                        if(status === "Clear"){
-                        if(creator_result === "Win"){
-                            creatorUser.win_coin += ((challenge.amount - challenge.amount * 10 / 100) * 2);
-                            await creatorUser.save();
-                            if (creatorUser.referral_code) {
-                                const referralUser = await User.findOne({ where: { invite_code: creatorUser.referral_code } });
-                                referralUser.refer_coin += (challenge.amount * 5 / 100);
-                                await referralUser.save();
+                        if (status === "Clear") {
+                            if (creator_result === "Win") {
+                                creatorUser.win_coin += ((challenge.amount - challenge.amount * 10 / 100) * 2);
+                                await creatorUser.save();
+                                if (creatorUser.referral_code) {
+                                    const referralUser = await User.findOne({ where: { invite_code: creatorUser.referral_code } });
+                                    if (referralUser) {
+                                        referralUser.refer_coin += (challenge.amount * 5 / 100);
+                                        await referralUser.save();
+                                    }
+                                }
+                            } else {
+                                joinerUser.win_coin += ((challenge.amount - challenge.amount * 10 / 100) * 2);
+                                await joinerUser.save();
+                                if (joinerUser.referral_code) {
+                                    const referralUser = await User.findOne({ where: { invite_code: joinerUser.referral_code } });
+                                    if (referralUser) {
+                                        referralUser.refer_coin += (challenge.amount * 5 / 100);
+                                        await referralUser.save();
+                                    }
+                                }
                             }
-                        } else{
-                            joinerUser.win_coin += ((challenge.amount - challenge.amount * 10 / 100) * 2);
-                            await joinerUser.save();
-                            if (joinerUser.referral_code) {
-                                const referralUser = await User.findOne({ where: { invite_code: joinerUser.referral_code } });
-                                referralUser.refer_coin += (challenge.amount * 5 / 100);
-                                await referralUser.save();
-                            }
-                        }
                         }
                         if (updatedRowsCount > 0) {
                             res.status(200).json({
@@ -305,23 +309,27 @@ class ChallengeController {
                         const creatorUser = await User.findOne({ where: { id: challenge.creator } });
                         const status = getChallengeStatus(_creator_result, joiner_result);
                         const [updatedRowsCount] = await Challenge.update({ challenge_status: status, joiner_result, updated_by, joiner_result_image: req.files.joiner_result_image ? req.files.joiner_result_image[0].filename : null }, { where: { id } });
-                        if(status === "Clear"){
-                        if(joiner_result === "Win"){
-                            joinerUser.win_coin += ((challenge.amount - challenge.amount * 10 / 100) * 2);
+                        if (status === "Clear") {
+                            if (joiner_result === "Win") {
+                                joinerUser.win_coin += ((challenge.amount - challenge.amount * 10 / 100) * 2);
                                 await joinerUser.save();
-                            if (joinerUser.referral_code) {
-                                const referralUser = await User.findOne({ where: { invite_code: joinerUser.referral_code } });
-                                referralUser.refer_coin += (challenge.amount * 5 / 100);
-                                await referralUser.save();
-                            }
-                            } else{
-                            creatorUser.win_coin += ((challenge.amount - challenge.amount * 10 / 100) * 2);
+                                if (joinerUser.referral_code) {
+                                    const referralUser = await User.findOne({ where: { invite_code: joinerUser.referral_code } });
+                                    if (referralUser) {
+                                        referralUser.refer_coin += (challenge.amount * 5 / 100);
+                                        await referralUser.save();
+                                    }
+                                }
+                            } else {
+                                creatorUser.win_coin += ((challenge.amount - challenge.amount * 10 / 100) * 2);
                                 await creatorUser.save();
-                            if (creatorUser.referral_code) {
-                                const referralUser = await User.findOne({ where: { invite_code: creatorUser.referral_code } });
-                                referralUser.refer_coin += (challenge.amount * 5 / 100);
-                                await referralUser.save();
-                            }
+                                if (creatorUser.referral_code) {
+                                    const referralUser = await User.findOne({ where: { invite_code: creatorUser.referral_code } });
+                                    if (referralUser) {
+                                        referralUser.refer_coin += (challenge.amount * 5 / 100);
+                                        await referralUser.save();
+                                    }
+                                }
                             }
                         }
                         if (updatedRowsCount > 0) {
@@ -366,24 +374,75 @@ class ChallengeController {
 
     // Clear a Challenge
     static async clearChallenge(req, res) {
-        const { admin_id, id } = req.body;
+        const { admin_id, id, creator_result, joiner_result } = req.body;
         try {
             const user = await User.findOne({ where: { id: admin_id } });
             if (user && user.admin) {
                 const challenge = await Challenge.findOne({ where: { id } });
                 if (challenge) {
-                    const [updatedRowsCount] = await Challenge.update(req.body, { where: { id } });
-                    if (updatedRowsCount > 0) {
-                        res.status(200).json({
-                            success: true,
-                            message: 'Challenge updated successfully'
-                        });
-                    } else {
-                        res.status(404).json({
+                    const joinerUser = await User.findOne({ where: { id: challenge.joiner } });
+                    const creatorUser = await User.findOne({ where: { id: challenge.creator } });
+
+                    if (!(creator_result === "Win" && joiner_result === "Win") && !((creator_result === "Cancel" && joiner_result !== "Cancel") || (creator_result !== "Cancel" && joiner_result === "Cancel"))) {
+
+                        if (creatorUser) {
+                            if (creator_result === "Win") {
+                                creatorUser.win_coin += ((challenge.amount - challenge.amount * 10 / 100) * 2);
+                                await creatorUser.save();
+                                if (creatorUser.referral_code) {
+                                    const referralUser = await User.findOne({ where: { invite_code: creatorUser.referral_code } });
+                                    if (referralUser) {
+                                        referralUser.refer_coin += (challenge.amount * 5 / 100);
+                                        await referralUser.save();
+                                    }
+                                }
+                            }
+
+                            else if (creator_result === "Cancel") {
+                                creatorUser.game_coin += challenge.amount;
+                                await creatorUser.save();
+                            }
+                        }
+
+                        if (joinerUser) {
+                            if (joiner_result === "Win") {
+                                joinerUser.win_coin += ((challenge.amount - challenge.amount * 10 / 100) * 2);
+                                await joinerUser.save();
+                                if (joinerUser.referral_code) {
+                                    const referralUser = await User.findOne({ where: { invite_code: joinerUser.referral_code } });
+                                    if (referralUser) {
+                                        referralUser.refer_coin += (challenge.amount * 5 / 100);
+                                        await referralUser.save();
+                                    }
+                                }
+                            }
+
+                            else if (joiner_result === "Cancel") {
+                                joinerUser.game_coin += challenge.amount;
+                                await joinerUser.save();
+                            }
+                        }
+
+                        const [updatedRowsCount] = await Challenge.update(req.body, { where: { id } });
+                        if (updatedRowsCount > 0) {
+                            res.status(200).json({
+                                success: true,
+                                message: 'Challenge updated successfully'
+                            });
+                        } else {
+                            res.status(404).json({
+                                success: false,
+                                message: 'Error updating Challenge'
+                            });
+                        }
+                    }
+                    else {
+                        res.status(500).json({
                             success: false,
-                            message: 'Error updating Challenge'
+                            message: 'Invalid Challenge results'
                         });
                     }
+
                 } else {
                     res.status(404).json({
                         success: false,

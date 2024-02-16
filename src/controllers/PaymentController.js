@@ -49,7 +49,10 @@ class PaymentController {
                 },
             });
         } catch (error) {
-            res.status(500).json({ success: false, error: 'Error fetching Payments' });
+            res.status(500).json({
+                success: false,
+                error: 'Error fetching Payments'
+            });
         }
     }
 
@@ -57,7 +60,7 @@ class PaymentController {
     static async getAllPaymentForUser(req, res) {
         const { id, offset, limit, sort, order } = req?.query;
         try {
-            const { count, rows: Payemnts } = await Payment.findAndCountAll({
+            const { count, rows: Payments } = await Payment.findAndCountAll({
                 where: {
                     [Op.or]: [{ user_id: id }],
                 },
@@ -71,9 +74,9 @@ class PaymentController {
             });
             res.json({
                 success: true,
-                message: 'Payements fetched successfully',
+                message: 'Payments fetched successfully',
                 data: {
-                    payemnts: Payemnts,
+                    payments: Payments,
                     totalCount: count,
                 },
             });
@@ -169,7 +172,7 @@ class PaymentController {
     }
 
     // Create a withdrawal payment
-    static async createWithdrawal(req, res) {
+    static async createWithdraw(req, res) {
         const { user_id, amount } = req.body;
 
         try {
@@ -182,11 +185,11 @@ class PaymentController {
             } else {
                 const payment = await PaymentService.createPayment({ ...req, type: 'Withdraw' });
                 if (payment?.success) {
-                    user.win_coin -= amount;
-                    await user.save();
+                    // user.win_coin -= parseFloat(amount);
+                    // await user.save();
                     res.status(200).json({
                         success: true,
-                        message: "Coin withdrawal successfully",
+                        message: "Coin withdrawal requested",
                     });
                 }
                 else {
@@ -217,12 +220,12 @@ class PaymentController {
             } else {
                 const payment = await PaymentService.createPayment({ ...req, type: 'Deposit' });
                 if (payment?.success) {
-                    const newTotalCoin = parseFloat(user.game_coin) + parseFloat(amount);
-                    user.game_coin = newTotalCoin;
-                    await user.save();
+                    // const newTotalCoin = parseFloat(user.game_coin) + parseFloat(amount);
+                    // user.game_coin = newTotalCoin;
+                    // await user.save();
                     res.status(200).json({
                         success: true,
-                        message: "Coin deposit successfully",
+                        message: "Coin deposit requested",
                     });
                 }
                 else {
@@ -236,6 +239,72 @@ class PaymentController {
             res.status(500).json({
                 success: false,
                 message: "Internal Server Error",
+            });
+        }
+    }
+
+    // Get all Deposit
+    static async getAllDeposit(req, res) {
+        try {
+            const { offset, limit, sort, order } = req?.query;
+            const { count, rows: Payments } = await Payment.findAndCountAll({
+                where: {
+                    type: 'Deposit',
+                    payment_status: 'Pending'
+                },
+                order: [[sort || 'updatedAt', order || 'DESC']],
+                ...(offset && {
+                    offset: Number(offset),
+                }),
+                ...(limit && {
+                    limit: Number(limit),
+                }),
+            });
+            res.status(200).json({
+                success: true,
+                message: "All Deposit Payments fetched successfully",
+                data: {
+                    payments: Payments,
+                    totalCount: count,
+                },
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                error: 'Error fetching Payments'
+            });
+        }
+    }
+
+    // Get all Withdraw
+    static async getAllWithdraw(req, res) {
+        try {
+            const { offset, limit, sort, order } = req?.query;
+            const { count, rows: Payments } = await Payment.findAndCountAll({
+                where: {
+                    type: 'Withdraw',
+                    payment_status: 'Pending'
+                },
+                order: [[sort || 'updatedAt', order || 'DESC']],
+                ...(offset && {
+                    offset: Number(offset),
+                }),
+                ...(limit && {
+                    limit: Number(limit),
+                }),
+            });
+            res.status(200).json({
+                success: true,
+                message: "All Withdraw Payments fetched successfully",
+                data: {
+                    payments: Payments,
+                    totalCount: count,
+                },
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                error: 'Error fetching Payments'
             });
         }
     }
