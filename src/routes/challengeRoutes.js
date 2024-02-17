@@ -31,4 +31,7 @@ router.put('/update-result', uploadMiddleware([
 // Get challenges for specific user by ID
 router.put('/clear-challenge', ChallengeController.clearChallenge);
 
+// Accept a challenge by ID
+router.put('/accept', ChallengeController.acceptChallengeById);
+
 module.exports = router;

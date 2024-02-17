@@ -464,6 +464,88 @@ class ChallengeController {
         }
     }
 
+    // Accept a Challenge by Id
+    static async acceptChallengeById(req, res) {
+        const { id, joiner } = req.body;
+        try {
+            const challenge = await Challenge.findOne({ where: { id } });
+            if (challenge) {
+                const { creator, amount, joiner: oldJoiner } = challenge;
+                console.log("oldJoiner", oldJoiner)
+                if (joiner) {
+                    if (oldJoiner) {
+                        res.status(500).json({
+                            success: false,
+                            message: 'Challenge is not available now'
+                        });
+                    }
+                    else {
+                        if (creator != joiner) {
+                            const joinerUser = await User.findOne({ where: { id: joiner } });
+                            const deductions = calculateCoinDeductions(joinerUser?.game_coin, joinerUser?.win_coin, joinerUser?.refer_coin, amount)
+
+                            if (!joinerUser || deductions?.remainingCoinRequired > 0) {
+                                return res.status(400).json({
+                                    success: false,
+                                    message: 'Joiner does not have enough coins for the challenge',
+                                });
+                            }
+                            else {
+                                const [updatedRowsCount] = await Challenge.update(req.body, { where: { id } });
+                                if (updatedRowsCount > 0) {
+                                    joinerUser.game_coin -= deductions?.gameCoinDeduction;
+                                    joinerUser.win_coin -= deductions?.winCoinDeduction;
+                                    joinerUser.refer_coin -= deductions?.referCoinDeduction;
+                                    await joinerUser.save();
+                                    res.status(200).json({
+                                        success: true,
+                                        message: 'Challenge accepted successfully'
+                                    });
+                                } else {
+                                    res.status(404).json({
+                                        success: false,
+                                        message: 'Challenge not found'
+                                    });
+                                }
+                            }
+                        }
+                        else {
+                            res.status(500).json({
+                                success: false,
+                                message: 'Creater is not allowed for this action'
+                            });
+                        }
+                    }
+                }
+                else {
+                    const [updatedRowsCount] = await Challenge.update(req.body, { where: { id } });
+                    if (updatedRowsCount > 0) {
+                        res.status(200).json({
+                            success: true,
+                            message: 'Challenge accepted successfully'
+                        });
+                    } else {
+                        res.status(500).json({
+                            success: false,
+                            message: 'Error updating Challenge'
+                        });
+                    }
+                }
+            } else {
+                res.status(404).json({
+                    success: false,
+                    message: 'Challenge not found'
+                });
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({
+                success: false,
+                message: 'Error updating Challenge'
+            });
+        }
+    }
+
 }
 
 module.exports = ChallengeController;
