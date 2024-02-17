@@ -51,6 +51,12 @@ const Challenge = sequelize.define('Challenge', {
     remark: {
         type: DataTypes.STRING(100),
     },
+    cancel_reason: {
+        type: DataTypes.STRING(100),
+    },
+    cancel_image: {
+        type: DataTypes.STRING,
+    },
     expiry_time: {
         type: DataTypes.DATE,
         allowNull: false,

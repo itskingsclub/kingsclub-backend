@@ -12,4 +12,15 @@ const getChallengeStatus = (creatorResult, joinerResult) => {
     return isClear ? "Clear" : "Review";
 }
 
-module.exports = { getChallengeStatus };
+const hasPendingResults = (lastChallenge, userId) => {
+    if (lastChallenge) {
+        if (lastChallenge.creator == userId) {
+            return lastChallenge.creator_result == "Waiting";
+        } else {
+            return lastChallenge.joiner_result == "Waiting";
+        }
+    }
+    return false;
+};
+
+module.exports = { getChallengeStatus, hasPendingResults };
