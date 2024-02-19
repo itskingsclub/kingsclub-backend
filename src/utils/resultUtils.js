@@ -4,12 +4,21 @@ const getChallengeStatus = (creatorResult, joinerResult) => {
         { creator: "Lose", joiner: "Win" }
     ];
 
+    const cancelCases = [
+        { creator: "Cancel", joiner: "Cancel" }
+    ];
+
     const isClear = clearCases.some(
         (caseResult) =>
             caseResult.creator === creatorResult && caseResult.joiner === joinerResult
     );
 
-    return isClear ? "Clear" : "Review";
+    const isCancel = cancelCases.some(
+        (caseResult) =>
+            caseResult.creator === creatorResult && caseResult.joiner === joinerResult
+    );
+
+    return isClear ? "Clear" : isCancel ? "Cancel" : "Review";
 }
 
 const hasPendingResults = (lastChallenge, userId) => {

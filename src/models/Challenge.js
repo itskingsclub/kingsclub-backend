@@ -51,10 +51,10 @@ const Challenge = sequelize.define('Challenge', {
     remark: {
         type: DataTypes.STRING(100),
     },
-    cancel_reason: {
-        type: DataTypes.STRING(100),
+    creator_cancel_reason: {
+        type: DataTypes.STRING,
     },
-    cancel_image: {
+    joiner_cancel_reason: {
         type: DataTypes.STRING,
     },
     expiry_time: {

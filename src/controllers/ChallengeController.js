@@ -299,6 +299,12 @@ class ChallengeController {
                                 }
                             }
                         }
+                        else if (status === "Cancel") {
+                            creatorUser.game_coin += challenge.amount;
+                            joinerUser.game_coin += challenge.amount;
+                            await creatorUser.save();
+                            await joinerUser.save();
+                        }
                         if (updatedRowsCount > 0) {
                             res.status(200).json({
                                 success: true,
@@ -346,6 +352,12 @@ class ChallengeController {
                                     }
                                 }
                             }
+                        }
+                        else if (status === "Cancel") {
+                            creatorUser.game_coin += challenge.amount;
+                            joinerUser.game_coin += challenge.amount;
+                            await creatorUser.save();
+                            await joinerUser.save();
                         }
                         if (updatedRowsCount > 0) {
                             res.status(200).json({
