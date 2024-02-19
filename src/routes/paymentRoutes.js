@@ -15,6 +15,7 @@ router.put('/update', PaymentController.updatePaymentById);
 router.delete('/delete', PaymentController.deletePaymentById);
 router.post('/withdraw', uploadMiddleware([{ name: 'image', maxCount: 1 }]), PaymentController.createWithdraw);
 router.post('/deposit', uploadMiddleware([{ name: 'image', maxCount: 1 }]), PaymentController.createDeposit);
+router.put('/update-withdraw', PaymentController.updateWithdraw);
 router.put('/update-deposit', PaymentController.updateDeposit);
 
 
