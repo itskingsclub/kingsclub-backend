@@ -309,6 +309,48 @@ class PaymentController {
         }
     }
 
+    // Update a deposit
+    static async updateDeposit(req, res) {
+        const { admin_id, user_id, id, amount } = req.body;
+        try {
+            const adminUser = await User.findOne({ where: { id: admin_id } });
+            if (adminUser && adminUser.admin) {
+                const payment = await Payment.findOne({
+                    where: {
+                        id: id
+                    }
+                });
+                if (payment && payment.user_id == user_id) {
+                    await payment.update(req.body);
+                    const user = await User.findOne({ where: { id: user_id } });
+                    user.game_coin += amount;
+                    await user.save();
+                    res.status(200).json({
+                        success: true,
+                        message: 'Payment updated successfully'
+                    });
+                } else {
+                    res.status(404).json({
+                        success: false,
+                        message: 'Payment not found for the user'
+                    });
+                }
+            }
+            else {
+                res.status(404).json({
+                    success: false,
+                    message: 'Not a valid admin'
+                });
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({
+                success: false,
+                message: 'Error updating Payment'
+            });
+        }
+    }
+
 }
 
 module.exports = PaymentController;
