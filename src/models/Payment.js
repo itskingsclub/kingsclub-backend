@@ -20,7 +20,6 @@ const Payment = sequelize.define('Payment', {
     },
     amount: {
         type: DataTypes.FLOAT,
-        allowNull: false,
     },
     payment_id: {
         type: DataTypes.STRING(45),

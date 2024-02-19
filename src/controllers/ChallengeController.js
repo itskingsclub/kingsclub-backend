@@ -1,8 +1,7 @@
 const Challenge = require('../models/Challenge');
 const User = require('../models/User');
-const OtpService = require("../services/OtpService");
 const { Op } = require("sequelize");
-const { getChallengeStatus } = require("../utils/resultUtils");
+const { getChallengeStatus, hasPendingResults } = require("../utils/resultUtils");
 const { calculateCoinDeductions } = require("../utils/numberUtils");
 
 class ChallengeController {
@@ -13,27 +12,44 @@ class ChallengeController {
         try {
             const creatorUser = await User.findOne({ where: { id: creator } });
             const deductions = calculateCoinDeductions(creatorUser?.game_coin, creatorUser?.win_coin, creatorUser?.refer_coin, amount)
+            const lastChallenge = await Challenge.findOne({
+                where: {
+                    [Op.or]: [{ creator }, { joiner: creator }],
+                },
+                order: [['createdAt', 'DESC']]
+            });
+            const pendingResults = hasPendingResults(lastChallenge, creator);
 
-            if (!creatorUser || deductions?.remainingCoinRequired > 0) {
+            if (pendingResults) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Creator does not have enough coins for the challenge',
+                    message: 'Submit result for last challenge before creating a new challenge',
                 });
             }
             else {
-                const newChallenge = await Challenge.create({ ...req.body, expiry_time, creator_result: 'Waiting', joiner_result: 'Waiting', challenge_status: 'Waiting', joiner_result: 'Waiting', updated_by: creator });
+                if (!creatorUser || deductions?.remainingCoinRequired > 0) {
+                    return res.status(400).json({
+                        success: false,
+                        message: 'Creator does not have enough coins for the challenge',
+                    });
+                }
+                else {
+                    const newChallenge = await Challenge.create({ ...req.body, expiry_time, creator_result: 'Waiting', joiner_result: 'Waiting', challenge_status: 'Waiting', joiner_result: 'Waiting', updated_by: creator });
 
-                creatorUser.game_coin -= deductions?.gameCoinDeduction;
-                creatorUser.win_coin -= deductions?.winCoinDeduction;
-                creatorUser.refer_coin -= deductions?.referCoinDeduction;
-                await creatorUser.save();
+                    creatorUser.game_coin -= deductions?.gameCoinDeduction;
+                    creatorUser.win_coin -= deductions?.winCoinDeduction;
+                    creatorUser.refer_coin -= deductions?.referCoinDeduction;
+                    await creatorUser.save();
 
-                res.status(201).json({
-                    success: true,
-                    message: "Challenge created successfully",
-                    data: newChallenge
-                });
+                    res.status(201).json({
+                        success: true,
+                        message: "Challenge created successfully",
+                        data: newChallenge
+                    });
+                }
             }
+
+
         } catch (error) {
             res.status(500).json({
                 success: false,
@@ -252,7 +268,6 @@ class ChallengeController {
         const { id, creator, joiner, creator_result, joiner_result, updated_by, amount } = req.body;
         try {
             const challenge = await Challenge.findOne({ where: { id } });
-            console.log("challenge_status", challenge.challenge_status)
             if (challenge) {
                 const { creator: _creator, joiner: _joiner, creator_result: _creator_result, joiner_result: _joiner_result, amount } = challenge?.dataValues;
                 if (creator && creator_result) {
@@ -260,7 +275,7 @@ class ChallengeController {
                         const creatorUser = await User.findOne({ where: { id: challenge.creator } });
                         const joinerUser = await User.findOne({ where: { id: challenge.joiner } });
                         const status = getChallengeStatus(creator_result, _joiner_result);
-                        const [updatedRowsCount] = await Challenge.update({ challenge_status: status, creator_result, updated_by, creator_result_image: req.files.creator_result_image ? req.files.creator_result_image[0].filename : null }, { where: { id } });
+                        const [updatedRowsCount] = await Challenge.update({ ...req.body, challenge_status: status, creator_result, updated_by, creator_result_image: req.files.creator_result_image ? req.files.creator_result_image[0].filename : null }, { where: { id } });
                         if (status === "Clear") {
                             if (creator_result === "Win") {
                                 creatorUser.win_coin += ((challenge.amount - challenge.amount * 10 / 100) * 2);
@@ -283,6 +298,12 @@ class ChallengeController {
                                     }
                                 }
                             }
+                        }
+                        else if (status === "Cancel") {
+                            creatorUser.game_coin += challenge.amount;
+                            joinerUser.game_coin += challenge.amount;
+                            await creatorUser.save();
+                            await joinerUser.save();
                         }
                         if (updatedRowsCount > 0) {
                             res.status(200).json({
@@ -308,7 +329,7 @@ class ChallengeController {
                         const joinerUser = await User.findOne({ where: { id: challenge.joiner } });
                         const creatorUser = await User.findOne({ where: { id: challenge.creator } });
                         const status = getChallengeStatus(_creator_result, joiner_result);
-                        const [updatedRowsCount] = await Challenge.update({ challenge_status: status, joiner_result, updated_by, joiner_result_image: req.files.joiner_result_image ? req.files.joiner_result_image[0].filename : null }, { where: { id } });
+                        const [updatedRowsCount] = await Challenge.update({ ...req.body, challenge_status: status, joiner_result, updated_by, joiner_result_image: req.files.joiner_result_image ? req.files.joiner_result_image[0].filename : null }, { where: { id } });
                         if (status === "Clear") {
                             if (joiner_result === "Win") {
                                 joinerUser.win_coin += ((challenge.amount - challenge.amount * 10 / 100) * 2);
@@ -331,6 +352,12 @@ class ChallengeController {
                                     }
                                 }
                             }
+                        }
+                        else if (status === "Cancel") {
+                            creatorUser.game_coin += challenge.amount;
+                            joinerUser.game_coin += challenge.amount;
+                            await creatorUser.save();
+                            await joinerUser.save();
                         }
                         if (updatedRowsCount > 0) {
                             res.status(200).json({
@@ -460,6 +487,92 @@ class ChallengeController {
             res.status(500).json({
                 success: false,
                 message: 'Error updating challenge result'
+            });
+        }
+    }
+
+    // Accept a Challenge by Id
+    static async acceptChallengeById(req, res) {
+        const { id, joiner } = req.body;
+        try {
+            const challenge = await Challenge.findOne({ where: { id } });
+
+            if (challenge) {
+                const { creator, amount, joiner: oldJoiner } = challenge;
+                if (joiner) {
+                    if (oldJoiner) {
+                        res.status(500).json({
+                            success: false,
+                            message: 'Challenge is not available now'
+                        });
+                    }
+                    else {
+
+                        const lastChallenge = await Challenge.findOne({
+                            where: {
+                                [Op.or]: [{ joiner }, { creator: joiner }],
+                            },
+                            order: [['createdAt', 'DESC']]
+                        });
+                        const pendingResults = hasPendingResults(lastChallenge, joiner);
+
+                        if (pendingResults) {
+                            return res.status(400).json({
+                                success: false,
+                                message: 'Submit result for last challenge before creating a new challenge',
+                            });
+                        }
+                        else {
+                            if (creator != joiner) {
+                                const joinerUser = await User.findOne({ where: { id: joiner } });
+                                const deductions = calculateCoinDeductions(joinerUser?.game_coin, joinerUser?.win_coin, joinerUser?.refer_coin, amount)
+
+                                if (!joinerUser || deductions?.remainingCoinRequired > 0) {
+                                    return res.status(400).json({
+                                        success: false,
+                                        message: 'Joiner does not have enough coins for the challenge',
+                                    });
+                                }
+                                else {
+                                    const [updatedRowsCount] = await Challenge.update(req.body, { where: { id } });
+                                    if (updatedRowsCount > 0) {
+                                        joinerUser.game_coin -= deductions?.gameCoinDeduction;
+                                        joinerUser.win_coin -= deductions?.winCoinDeduction;
+                                        joinerUser.refer_coin -= deductions?.referCoinDeduction;
+                                        await joinerUser.save();
+                                        res.status(200).json({
+                                            success: true,
+                                            message: 'Challenge accepted successfully'
+                                        });
+                                    } else {
+                                        res.status(404).json({
+                                            success: false,
+                                            message: 'Challenge not found'
+                                        });
+                                    }
+                                }
+                            }
+                            else {
+                                res.status(500).json({
+                                    success: false,
+                                    message: 'Creater is not allowed for this action'
+                                });
+                            }
+                        }
+
+                    }
+                }
+            } else {
+                res.status(404).json({
+                    success: false,
+                    message: 'Challenge not found'
+                });
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({
+                success: false,
+                message: 'Error updating Challenge'
             });
         }
     }
