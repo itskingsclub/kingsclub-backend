@@ -209,7 +209,7 @@ class PaymentController {
 
     // Create a deposit payment
     static async createDeposit(req, res) {
-        const { user_id, amount } = req.body;
+        const { user_id } = req.body;
         try {
             const user = await User.findOne({ where: { id: user_id } });
             if (!user) {
