@@ -275,7 +275,7 @@ class ChallengeController {
                         const creatorUser = await User.findOne({ where: { id: challenge.creator } });
                         const joinerUser = await User.findOne({ where: { id: challenge.joiner } });
                         const status = getChallengeStatus(creator_result, _joiner_result);
-                        const [updatedRowsCount] = await Challenge.update({ challenge_status: status, creator_result, updated_by, creator_result_image: req.files.creator_result_image ? req.files.creator_result_image[0].filename : null }, { where: { id } });
+                        const [updatedRowsCount] = await Challenge.update({ ...req.body, challenge_status: status, creator_result, updated_by, creator_result_image: req.files.creator_result_image ? req.files.creator_result_image[0].filename : null }, { where: { id } });
                         if (status === "Clear") {
                             if (creator_result === "Win") {
                                 creatorUser.win_coin += ((challenge.amount - challenge.amount * 10 / 100) * 2);
@@ -329,7 +329,7 @@ class ChallengeController {
                         const joinerUser = await User.findOne({ where: { id: challenge.joiner } });
                         const creatorUser = await User.findOne({ where: { id: challenge.creator } });
                         const status = getChallengeStatus(_creator_result, joiner_result);
-                        const [updatedRowsCount] = await Challenge.update({ challenge_status: status, joiner_result, updated_by, joiner_result_image: req.files.joiner_result_image ? req.files.joiner_result_image[0].filename : null }, { where: { id } });
+                        const [updatedRowsCount] = await Challenge.update({ ...req.body, challenge_status: status, joiner_result, updated_by, joiner_result_image: req.files.joiner_result_image ? req.files.joiner_result_image[0].filename : null }, { where: { id } });
                         if (status === "Clear") {
                             if (joiner_result === "Win") {
                                 joinerUser.win_coin += ((challenge.amount - challenge.amount * 10 / 100) * 2);
