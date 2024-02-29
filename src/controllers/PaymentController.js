@@ -180,9 +180,23 @@ class PaymentController {
             if (!user || user?.dataValues?.win_coin < amount) {
                 return res.status(400).json({
                     success: false,
-                    message: 'User does not have enough coins to withdrawal',
+                    message: "You don't have enough coins to withdrawal",
                 });
             } else {
+                if (parseFloat(amount) < 100) {
+                    return res.status(400).json({
+                        success: false,
+                        message: 'Amount Should be mimimum of 100',
+                    });
+                }
+
+                // Check if amount is a multiple of 10
+                if (parseFloat(amount) % 50 !== 0) {
+                    return res.status(400).json({
+                        success: false,
+                        message: 'Amount Should be multiple of 50',
+                    });
+                }
                 const payment = await PaymentService.createPayment({ ...req, type: 'Withdraw' });
                 if (payment?.success) {
                     user.win_coin -= parseFloat(amount);

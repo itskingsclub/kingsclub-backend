@@ -10,7 +10,7 @@ class UserController {
             if (user) {
                 res.status(409).json({
                     success: false,
-                    message: "User already exists, please login",
+                    message: "You have Already An Account, please login",
                 });
             } else {
                 const newUser = await User.create({ ...req.body, invite_code: generateInviteCode(), game_coin: 500, profile: req.file ? req.file.filename : null });
@@ -104,7 +104,7 @@ class UserController {
             if (updatedRowsCount > 0) {
                 res.status(200).json({
                     success: true,
-                    message: 'User updated successfully'
+                    message: 'Profile updated successfully'
                 });
             } else {
                 res.status(404).json({
@@ -169,7 +169,7 @@ class UserController {
             } else {
                 res.status(404).json({
                     success: false,
-                    message: 'User not found'
+                    message: "don't find any account for this number"
                 });
             }
         } catch (error) {
