@@ -3,7 +3,7 @@ const path = require('path');
 
 // Set storage engine
 const storage = multer.diskStorage({
-    destination: './paymentimages',
+    destination: './upload',
     filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
         const extension = path.extname(file.originalname);
