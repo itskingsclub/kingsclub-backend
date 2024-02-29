@@ -30,10 +30,24 @@ class ChallengeController {
                 if (!creatorUser || deductions?.remainingCoinRequired > 0) {
                     return res.status(400).json({
                         success: false,
-                        message: 'Creator does not have enough coins for the challenge',
+                        message: "You don't enough coins for the challenge",
                     });
                 }
                 else {
+                    if (parseFloat(amount) < 50) {
+                        return res.status(400).json({
+                            success: false,
+                            message: 'Amount Should be minimum of 50',
+                        });
+                    }
+
+                    // Check if amount is a multiple of 10
+                    if (parseFloat(amount) % 10 !== 0) {
+                        return res.status(400).json({
+                            success: false,
+                            message: 'Amount Should be multiple of 10',
+                        });
+                    }
                     const newChallenge = await Challenge.create({ ...req.body, expiry_time, creator_result: 'Waiting', joiner_result: 'Waiting', challenge_status: 'Waiting', joiner_result: 'Waiting', updated_by: creator });
 
                     creatorUser.game_coin -= deductions?.gameCoinDeduction;
@@ -143,7 +157,7 @@ class ChallengeController {
                         if (!joinerUser || deductions?.remainingCoinRequired > 0) {
                             return res.status(400).json({
                                 success: false,
-                                message: 'Joiner does not have enough coins for the challenge',
+                                message: "You don't have enough coins for the join challenge",
                             });
                         }
                         else {
@@ -530,7 +544,7 @@ class ChallengeController {
                                 if (!joinerUser || deductions?.remainingCoinRequired > 0) {
                                     return res.status(400).json({
                                         success: false,
-                                        message: 'Joiner does not have enough coins for the challenge',
+                                        message: "You don't have enough coins for the challenge",
                                     });
                                 }
                                 else {
