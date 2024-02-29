@@ -230,3 +230,6 @@ jspm_packages/
 *.tsbuildinfo
 *.tsbuildinfo.*
 *.tsbuildinfo.test*
+
+#custom
+upload
