@@ -11,6 +11,9 @@ router.post('/register', uploadMiddleware([{ name: 'profile', maxCount: 1 }]), U
 // Get all user
 router.get('/', paginationMiddleware, UserController.getAllUsers);
 
+// Verify Pin
+router.get('/leaderboard', paginationMiddleware, UserController.leaderboard);
+
 // Get a specific user by ID
 router.get('/:id', UserController.getUserById);
 
@@ -25,5 +28,6 @@ router.post('/login', UserController.logInUser);
 
 // Verify Pin
 router.post('/verify-pin', UserController.verifyPin);
+
 
 module.exports = router;

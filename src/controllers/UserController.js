@@ -1,6 +1,8 @@
 const User = require('../models/User');
 const OtpService = require("../services/OtpService");
 const { generateInviteCode } = require("../utils/numberUtils");
+const Challenge = require('../models/Challenge');
+const { Op } = require('sequelize');
 class UserController {
     // Create a new user
     static async createUser(req, res) {
@@ -239,6 +241,65 @@ class UserController {
             });
         }
     }
+
+    static async leaderboard(req, res) {
+        try {
+            let from_date = req.query.from_date;
+            let to_date = req.query.to_date;
+
+            let dateCondition = {};
+            if (from_date && to_date) {
+                dateCondition = {
+                    createdAt: {
+                        [Op.between]: [from_date, to_date],
+                    },
+                };
+            }
+            const users = await User.findAll();
+            const leaderboardData = [];
+            for (const user of users) {
+                const challenges = await Challenge.findAll({
+                    where: {
+                        [Op.or]: [
+                            { creator: user.id, creator_result: 'Win' },
+                            { joiner: user.id, joiner_result: 'Win' }
+                        ],
+                        ...dateCondition,
+                    }
+                });
+                const totalWinCoin = challenges.reduce((total, challenge) => {
+                    return total + (challenge.creator === user.id ? ((challenge.amount * 17) / 10) : -((challenge.amount * 17) / 10));
+                }, 0);
+                leaderboardData.push({
+                    id: user.id,
+                    mobile: user.mobile,
+                    profile: user.profile,
+                    totalWinCoin
+                });
+            }
+            leaderboardData.sort((a, b) => b.totalWinCoin - a.totalWinCoin);
+
+            // Pagination
+            const { offset, limit } = req.pagination;
+            const paginatedData = leaderboardData.slice(offset, offset + limit);
+
+            res.json({
+                success: true,
+                message: "Leaderboard fetched successfully",
+                data: {
+                    leaderboard: paginatedData
+                }
+            });
+        } catch (error) {
+            console.error("Error fetching leaderboard:", error);
+            res.status(500).json({
+                success: false,
+                message: "Error fetching leaderboard",
+                error: error.message
+            });
+        }
+    };
+
 
 }
 
