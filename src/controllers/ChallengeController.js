@@ -3,6 +3,7 @@ const User = require('../models/User');
 const { Op } = require("sequelize");
 const { getChallengeStatus, hasPendingResults } = require("../utils/resultUtils");
 const { calculateCoinDeductions } = require("../utils/numberUtils");
+const PaymentService = require('../services/PaymentService');
 
 class ChallengeController {
     // Create a new Challenge
@@ -55,11 +56,20 @@ class ChallengeController {
                     creatorUser.refer_coin -= deductions?.referCoinDeduction;
                     await creatorUser.save();
 
-                    res.status(201).json({
-                        success: true,
-                        message: "Challenge created successfully",
-                        data: newChallenge
-                    });
+                    const payment = await PaymentService.createPayment({ ...req, type: 'Create Challenge', payment_mode: "User", payment_status: "Sucessfull", updated_by: creator, user_id: creator });
+                    if (payment?.success) {
+                        res.status(201).json({
+                            success: true,
+                            message: "Challenge created successfully",
+                            data: newChallenge
+                        });
+                    }
+                    else {
+                        res.status(500).json({
+                            success: false,
+                            message: 'Error withdrawing coin'
+                        });
+                    }
                 }
             }
 
@@ -507,7 +517,7 @@ class ChallengeController {
 
     // Accept a Challenge by Id
     static async acceptChallengeById(req, res) {
-        const { id, joiner } = req.body;
+        const { id, joiner, amount } = req.body;
         try {
             const challenge = await Challenge.findOne({ where: { id } });
 
@@ -554,10 +564,19 @@ class ChallengeController {
                                         joinerUser.win_coin -= deductions?.winCoinDeduction;
                                         joinerUser.refer_coin -= deductions?.referCoinDeduction;
                                         await joinerUser.save();
-                                        res.status(200).json({
-                                            success: true,
-                                            message: 'Challenge accepted successfully'
-                                        });
+                                        const payment = await PaymentService.createPayment({ ...req, type: 'Accept Challenge', payment_mode: "User", payment_status: "Sucessfull", updated_by: joiner, user_id: joiner, amount: amount });
+                                        if (payment?.success) {
+                                            res.status(200).json({
+                                                success: true,
+                                                message: "Challenge accepted successfully",
+                                            });
+                                        }
+                                        else {
+                                            res.status(500).json({
+                                                success: false,
+                                                message: 'Error withdrawing coin'
+                                            });
+                                        }
                                     } else {
                                         res.status(404).json({
                                             success: false,

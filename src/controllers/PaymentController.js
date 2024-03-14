@@ -197,7 +197,7 @@ class PaymentController {
                         message: 'Amount Should be multiple of 50',
                     });
                 }
-                const payment = await PaymentService.createPayment({ ...req, type: 'Withdraw' });
+                const payment = await PaymentService.createPayment({ ...req, type: 'Withdraw', payment_mode: "Admin", payment_status: "Pending", updated_by: user_id });
                 if (payment?.success) {
                     user.win_coin -= parseFloat(amount);
                     await user.save();
@@ -232,7 +232,7 @@ class PaymentController {
                     message: 'User not found',
                 });
             } else {
-                const payment = await PaymentService.createPayment({ ...req, type: 'Deposit' });
+                const payment = await PaymentService.createPayment({ ...req, type: 'Deposit', payment_mode: "Admin", payment_status: "Pending", updated_by: user_id });
                 if (payment?.success) {
                     // const newTotalCoin = parseFloat(user.game_coin) + parseFloat(amount);
                     // user.game_coin = newTotalCoin;
