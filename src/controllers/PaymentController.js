@@ -325,7 +325,7 @@ class PaymentController {
 
     // Update a deposit
     static async updateDeposit(req, res) {
-        const { admin_id, user_id, id, amount } = req.body;
+        const { admin_id, user_id, id, amount, payment_status } = req.body;
         try {
             const adminUser = await User.findOne({ where: { id: admin_id } });
             if (adminUser && adminUser.admin) {
@@ -335,14 +335,22 @@ class PaymentController {
                     }
                 });
                 if (payment && payment.user_id == user_id && amount) {
-                    await payment.update(req.body);
-                    const user = await User.findOne({ where: { id: user_id } });
-                    user.game_coin += amount;
-                    await user.save();
-                    res.status(200).json({
-                        success: true,
-                        message: 'Payment updated successfully'
-                    });
+                    if (payment_status !== "Cancel" && payment_status !== "Fraud") {
+                        await payment.update(req.body);
+                        const user = await User.findOne({ where: { id: user_id } });
+                        user.game_coin += amount;
+                        await user.save();
+                        res.status(200).json({
+                            success: true,
+                            message: 'Payment updated successfully'
+                        });
+                    } else {
+                        await payment.update(req.body); // Update payment status only
+                        res.status(200).json({
+                            success: true,
+                            message: 'Payment status updated successfully'
+                        });
+                    }
                 } else {
                     res.status(404).json({
                         success: false,
