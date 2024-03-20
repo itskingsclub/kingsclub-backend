@@ -270,12 +270,14 @@ class UserController {
                 const totalWinCoin = challenges.reduce((total, challenge) => {
                     return total + (challenge.creator === user.id ? ((challenge.amount * 17) / 10) : -((challenge.amount * 17) / 10));
                 }, 0);
-                leaderboardData.push({
-                    id: user.id,
-                    mobile: user.mobile,
-                    profile: user.profile,
-                    totalWinCoin
-                });
+                if (totalWinCoin !== 0) {
+                    leaderboardData.push({
+                        id: user.id,
+                        mobile: user.mobile,
+                        profile: user.profile,
+                        totalWinCoin
+                    });
+                }
             }
             leaderboardData.sort((a, b) => b.totalWinCoin - a.totalWinCoin);
 
