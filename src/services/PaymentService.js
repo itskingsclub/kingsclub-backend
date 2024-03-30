@@ -3,6 +3,7 @@ const Payment = require('../models/Payment')
 class PaymentService {
     static async createPayment(payload) {
         const { user_id } = payload.body;
+        console.log("PV 1", payload.files)
         try {
             const newPayment = await Payment.create({
                 ...payload?.body,
