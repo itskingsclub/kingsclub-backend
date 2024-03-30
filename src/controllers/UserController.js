@@ -6,7 +6,7 @@ const { Op } = require('sequelize');
 class UserController {
     // Create a new user
     static async createUser(req, res) {
-        const { mobile } = req.body;
+        const { mobile, name } = req.body;
         try {
             const user = await User.findOne({ where: { mobile } });
             if (user) {
@@ -15,7 +15,7 @@ class UserController {
                     message: "You have Already An Account, please login",
                 });
             } else {
-                const newUser = await User.create({ ...req.body, invite_code: generateInviteCode(), game_coin: 500, profile: req.file ? req.file.filename : null });
+                const newUser = await User.create({ ...req.body, invite_code: generateInviteCode(), game_coin: 500, account_holder_name: name, profile: req.file ? req.file.filename : null });
                 const sendOtp = await OtpService.sendOtp(mobile);
                 if (sendOtp?.success) {
                     res.status(200).json({
