@@ -57,6 +57,21 @@ const User = sequelize.define('User', {
     state: {
         type: DataTypes.STRING(45),
     },
+    account_holder_name: {
+        type: DataTypes.STRING(45),
+    },
+    bank_name: {
+        type: DataTypes.STRING(45),
+    },
+    account_number: {
+        type: DataTypes.STRING(45),
+    },
+    ifsc_code: {
+        type: DataTypes.STRING(45),
+    },
+    upi_id: {
+        type: DataTypes.STRING(45),
+    },
 });
 
 module.exports = User;
