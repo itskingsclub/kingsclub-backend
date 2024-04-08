@@ -388,7 +388,7 @@ class PaymentController {
 
     // Update a withdraw
     static async updateWithdraw(req, res) {
-        const { admin_id, user_id, id } = req.body;
+        const { admin_id, user_id, id, payment_status } = req.body;
         try {
             const adminUser = await User.findOne({ where: { id: admin_id } });
             if (adminUser && adminUser.admin) {
@@ -398,6 +398,13 @@ class PaymentController {
                     }
                 });
                 if (payment && payment.user_id == user_id) {
+                    if (payment_status === "Cancel") {
+                        const user = await User.findOne({ where: { id: user_id } });
+                        if (user) {
+                            user.win_coin += payment.amount;
+                            await user.save();
+                        }
+                    }
                     await payment.update(req.body);
                     res.status(200).json({
                         success: true,
