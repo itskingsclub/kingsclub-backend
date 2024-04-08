@@ -17,6 +17,6 @@ router.post('/withdraw', uploadMiddleware([{ name: 'image', maxCount: 1 }]), Pay
 router.post('/deposit', uploadMiddleware([{ name: 'image', maxCount: 1 }]), PaymentController.createDeposit);
 router.put('/update-withdraw', PaymentController.updateWithdraw);
 router.put('/update-deposit', PaymentController.updateDeposit);
-
+router.put('/deduct-coin', PaymentController.deductCoin);
 
 module.exports = router;

@@ -36,6 +36,9 @@ class PaymentController {
                 ...(offset && {
                     offset: Number(offset),
                 }),
+                include: [
+                    { model: User, as: 'user' },
+                ],
                 ...(limit && {
                     limit: Number(limit),
                 }),
@@ -93,7 +96,11 @@ class PaymentController {
     static async getPaymentById(req, res) {
         const { id } = req.params;
         try {
-            const payment = await Payment.findOne({ where: { id } });
+            const payment = await Payment.findOne({
+                where: { id }, include: [
+                    { model: User, as: 'user' },
+                ],
+            });
 
             if (payment) {
                 res.status(200).json({
@@ -266,6 +273,9 @@ class PaymentController {
                     type: 'Deposit',
                     payment_status: 'Pending'
                 },
+                include: [
+                    { model: User, as: 'user' },
+                ],
                 order: [[sort || 'updatedAt', order || 'DESC']],
                 ...(offset && {
                     offset: Number(offset),
@@ -299,6 +309,9 @@ class PaymentController {
                     type: 'Withdraw',
                     payment_status: 'Pending'
                 },
+                include: [
+                    { model: User, as: 'user' },
+                ],
                 order: [[sort || 'updatedAt', order || 'DESC']],
                 ...(offset && {
                     offset: Number(offset),
@@ -375,7 +388,7 @@ class PaymentController {
 
     // Update a withdraw
     static async updateWithdraw(req, res) {
-        const { admin_id, user_id, id } = req.body;
+        const { admin_id, user_id, id, payment_status } = req.body;
         try {
             const adminUser = await User.findOne({ where: { id: admin_id } });
             if (adminUser && adminUser.admin) {
@@ -385,6 +398,13 @@ class PaymentController {
                     }
                 });
                 if (payment && payment.user_id == user_id) {
+                    if (payment_status === "Cancel") {
+                        const user = await User.findOne({ where: { id: user_id } });
+                        if (user) {
+                            user.win_coin += payment.amount;
+                            await user.save();
+                        }
+                    }
                     await payment.update(req.body);
                     res.status(200).json({
                         success: true,
@@ -408,6 +428,51 @@ class PaymentController {
             res.status(500).json({
                 success: false,
                 message: 'Error updating Payment'
+            });
+        }
+    }
+
+    // deduct coin by admin
+    static async deductCoin(req, res) {
+        const { admin_id, user_id, amount } = req.body;
+        try {
+            const adminUser = await User.findOne({ where: { id: admin_id } });
+            if (adminUser && adminUser.admin) {
+                const user = await User.findOne({ where: { id: user_id } });
+                if (!user || user?.dataValues?.game_coin < amount) {
+                    return res.status(400).json({
+                        success: false,
+                        message: "User don't have enough coins to deduct",
+                    });
+                } else {
+                    const payment = await PaymentService.createPayment({ ...req, type: 'Withdraw', updated_by: admin_id, payment_mode: "Admin", payment_status: "Sucessfull" });
+                    if (payment?.success) {
+                        user.game_coin -= parseFloat(amount);
+                        await user.save();
+                        res.status(200).json({
+                            success: true,
+                            message: "Coin deducted successfully",
+                        });
+                    }
+                    else {
+                        res.status(500).json({
+                            success: false,
+                            message: 'Error withdrawing coin'
+                        });
+                    }
+                }
+            }
+            else {
+                res.status(404).json({
+                    success: false,
+                    message: 'Not a valid admin'
+                });
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({
+                success: false,
+                message: 'Error deduct coin'
             });
         }
     }

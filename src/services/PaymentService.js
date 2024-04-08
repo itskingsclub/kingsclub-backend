@@ -6,10 +6,10 @@ class PaymentService {
         try {
             const newPayment = await Payment.create({
                 ...payload?.body,
-                updated_by: user_id,
+                updated_by: payload?.updated_by || user_id,
                 type: payload?.type,
-                payment_mode: "Admin",
-                payment_status: "Pending",
+                payment_mode: payload?.payment_mode || "Upi",
+                payment_status: payload?.payment_status || "Pending",
                 ...(payload?.files?.image && {
                     image: payload?.files?.image[0]?.filename,
                 }),
