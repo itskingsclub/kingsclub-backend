@@ -11,6 +11,9 @@ router.post('/create', ChallengeController.createChallenge);
 // Get all challenge
 router.get('/', paginationMiddleware, ChallengeController.getAllChallenges);
 
+// Get all review challenges
+router.get('/all-review', paginationMiddleware, ChallengeController.getAllReview);
+
 // Get a specific challenge by ID
 router.get('/:id', ChallengeController.getChallengeById);
 

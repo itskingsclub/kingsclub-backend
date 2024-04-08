@@ -49,4 +49,7 @@ const Payment = sequelize.define('Payment', {
     },
 });
 
+// Define associations
+Payment.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
 module.exports = Payment;

@@ -109,6 +109,40 @@ class ChallengeController {
         }
     }
 
+    // Get all review Challenges
+    static async getAllReview(req, res) {
+        try {
+            const { offset, limit, sort, order } = req?.query;
+            const { count, rows: Challenges } = await Challenge.findAndCountAll({
+                where: {
+                    challenge_status: 'Review'
+                },
+                include: [
+                    { model: User, as: 'creatorUser' },
+                    { model: User, as: 'joinerUser' },
+                ],
+                order: [[sort || 'updatedAt', order || 'DESC']],
+                ...(offset && {
+                    offset: Number(offset),
+                }),
+                ...(limit && {
+                    limit: Number(limit),
+                }),
+            });
+
+            res.status(200).json({
+                success: true,
+                message: "All Review Challenge fetched successfully",
+                data: {
+                    challenges: Challenges,
+                    totalCount: count,
+                },
+            });
+        } catch (error) {
+            res.status(500).json({ success: false, error: 'Error fetching Challenges' });
+        }
+    }
+
     // Get a specific Challenge by Id
     static async getChallengeById(req, res) {
         const { id } = req.params;

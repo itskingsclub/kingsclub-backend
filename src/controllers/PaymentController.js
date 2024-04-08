@@ -36,6 +36,9 @@ class PaymentController {
                 ...(offset && {
                     offset: Number(offset),
                 }),
+                include: [
+                    { model: User, as: 'user' },
+                ],
                 ...(limit && {
                     limit: Number(limit),
                 }),
@@ -93,7 +96,11 @@ class PaymentController {
     static async getPaymentById(req, res) {
         const { id } = req.params;
         try {
-            const payment = await Payment.findOne({ where: { id } });
+            const payment = await Payment.findOne({
+                where: { id }, include: [
+                    { model: User, as: 'user' },
+                ],
+            });
 
             if (payment) {
                 res.status(200).json({
@@ -266,6 +273,9 @@ class PaymentController {
                     type: 'Deposit',
                     payment_status: 'Pending'
                 },
+                include: [
+                    { model: User, as: 'user' },
+                ],
                 order: [[sort || 'updatedAt', order || 'DESC']],
                 ...(offset && {
                     offset: Number(offset),
@@ -299,6 +309,9 @@ class PaymentController {
                     type: 'Withdraw',
                     payment_status: 'Pending'
                 },
+                include: [
+                    { model: User, as: 'user' },
+                ],
                 order: [[sort || 'updatedAt', order || 'DESC']],
                 ...(offset && {
                     offset: Number(offset),
