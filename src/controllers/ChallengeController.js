@@ -48,7 +48,7 @@ class ChallengeController {
                             message: 'Amount Should be multiple of 10',
                         });
                     }
-                    const newChallenge = await Challenge.create({ ...req.body, expiry_time, creator_result: 'Waiting', joiner_result: 'Waiting', challenge_status: 'Waiting', joiner_result: 'Waiting', updated_by: creator });
+                    const newChallenge = await Challenge.create({ ...req.body, expiry_time, creator_result: 'Waiting', challenge_status: 'Waiting', updated_by: creator });
 
                     creatorUser.game_coin -= deductions?.gameCoinDeduction;
                     creatorUser.win_coin -= deductions?.winCoinDeduction;
@@ -349,9 +349,11 @@ class ChallengeController {
                         }
                         else if (status === "Cancel") {
                             creatorUser.game_coin += challenge.amount;
-                            joinerUser.game_coin += challenge.amount;
                             await creatorUser.save();
-                            await joinerUser.save();
+                            if (joinerUser) {
+                                joinerUser.game_coin += challenge.amount;
+                                await joinerUser.save();
+                            }
                         }
                         if (updatedRowsCount > 0) {
                             res.status(200).json({

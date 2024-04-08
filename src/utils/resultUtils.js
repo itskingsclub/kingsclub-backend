@@ -5,7 +5,8 @@ const getChallengeStatus = (creatorResult, joinerResult) => {
     ];
 
     const cancelCases = [
-        { creator: "Cancel", joiner: "Cancel" }
+        { creator: "Cancel", joiner: "Cancel" },
+        { creator: "Cancel", joiner: null }
     ];
 
     const isClear = clearCases.some(
