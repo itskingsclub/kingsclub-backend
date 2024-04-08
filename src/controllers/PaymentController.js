@@ -425,6 +425,51 @@ class PaymentController {
         }
     }
 
+    // deduct coin by admin
+    static async deductCoin(req, res) {
+        const { admin_id, user_id, amount } = req.body;
+        try {
+            const adminUser = await User.findOne({ where: { id: admin_id } });
+            if (adminUser && adminUser.admin) {
+                const user = await User.findOne({ where: { id: user_id } });
+                if (!user || user?.dataValues?.game_coin < amount) {
+                    return res.status(400).json({
+                        success: false,
+                        message: "User don't have enough coins to deduct",
+                    });
+                } else {
+                    const payment = await PaymentService.createPayment({ ...req, type: 'Withdraw', updated_by: admin_id, payment_mode: "Admin", payment_status: "Sucessfull" });
+                    if (payment?.success) {
+                        user.game_coin -= parseFloat(amount);
+                        await user.save();
+                        res.status(200).json({
+                            success: true,
+                            message: "Coin deducted successfully",
+                        });
+                    }
+                    else {
+                        res.status(500).json({
+                            success: false,
+                            message: 'Error withdrawing coin'
+                        });
+                    }
+                }
+            }
+            else {
+                res.status(404).json({
+                    success: false,
+                    message: 'Not a valid admin'
+                });
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({
+                success: false,
+                message: 'Error deduct coin'
+            });
+        }
+    }
+
 }
 
 module.exports = PaymentController;
