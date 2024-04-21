@@ -42,8 +42,29 @@ class UserController {
     // Get all users
     static async getAllUsers(req, res) {
         try {
-            const { offset, limit, sort, order } = req?.query;
+            const { offset, limit, sort, order, name, mobile } = req?.query;
+            const whereCondition = {};
+            if (name && mobile) {
+                // Search for users where both name and mobile match
+                whereCondition[Op.and] = [
+                    { name: { [Op.like]: `%${name}%` } },
+                    { mobile: { [Op.like]: `%${mobile}%` } }
+                ];
+            } else {
+                // Search for users where either name or mobile matches
+                whereCondition[Op.or] = [];
+
+                if (name !== "") {
+                    whereCondition[Op.or].push({ name: { [Op.like]: `%${name}%` } });
+                }
+                if (mobile !== "") {
+                    whereCondition[Op.or].push({ mobile: { [Op.like]: `%${mobile}%` } });
+                }
+            }
             const { count, rows: Users } = await User.findAndCountAll({
+                ...((name || mobile) && {
+                    where: whereCondition,
+                }),
                 order: [[sort || 'updatedAt', order || 'DESC']],
                 ...(offset && {
                     offset: Number(offset),
