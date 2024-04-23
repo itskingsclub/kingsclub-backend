@@ -1,8 +1,12 @@
+const dotenv = require('dotenv');
 const User = require('../models/User');
 const OtpService = require("../services/OtpService");
 const { generateInviteCode } = require("../utils/numberUtils");
 const Challenge = require('../models/Challenge');
 const { Op } = require('sequelize');
+
+dotenv.config();
+
 class UserController {
     // Create a new user
     static async createUser(req, res) {
@@ -214,6 +218,7 @@ class UserController {
                     res.status(200).json({
                         success: true,
                         message: verifyOTP?.message,
+                        win_percentage: process.env.WIN_PERCENTAGE,
                         token: verifyOTP?.token,
                         data: user,
                     });
