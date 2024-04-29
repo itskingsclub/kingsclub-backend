@@ -286,6 +286,7 @@ class UserController {
             for (const user of users) {
                 const challenges = await Challenge.findAll({
                     where: {
+                        challenge_status: 'Clear',
                         [Op.or]: [
                             { creator: user.id, creator_result: 'Win' },
                             { joiner: user.id, joiner_result: 'Win' }
@@ -294,7 +295,7 @@ class UserController {
                     }
                 });
                 const totalWinCoin = challenges.reduce((total, challenge) => {
-                    return total + (challenge.creator === user.id ? ((challenge.amount * 17) / 10) : -((challenge.amount * 17) / 10));
+                    return total + (challenge.creator === user.id ? ((challenge.amount * process.env.WIN_PERCENTAGE) / 100) : 0);
                 }, 0);
                 if (totalWinCoin !== 0) {
                     leaderboardData.push({
