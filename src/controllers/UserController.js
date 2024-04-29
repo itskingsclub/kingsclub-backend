@@ -218,7 +218,11 @@ class UserController {
                     res.status(200).json({
                         success: true,
                         message: verifyOTP?.message,
-                        win_percentage: process.env.WIN_PERCENTAGE,
+                        percentage: {
+                            win_percentage: process.env.WIN_PERCENTAGE,
+                            platform_percentage: process.env.PLATFORM_PERCENTAGE,
+                            refer_percentage: process.env.REFER_PERCENTAGE,
+                        },
                         token: verifyOTP?.token,
                         data: user,
                     });

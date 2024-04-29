@@ -1,8 +1,11 @@
+const dotenv = require('dotenv');
 const Challenge = require('../models/Challenge');
 const User = require('../models/User');
 const { Op } = require("sequelize");
 const { getChallengeStatus, hasPendingResults } = require("../utils/resultUtils");
 const { calculateCoinDeductions } = require("../utils/numberUtils");
+
+dotenv.config();
 
 class ChallengeController {
     // Create a new Challenge
@@ -326,22 +329,22 @@ class ChallengeController {
                         const [updatedRowsCount] = await Challenge.update({ ...req.body, challenge_status: status, creator_result, updated_by, creator_result_image: req.files.creator_result_image ? req.files.creator_result_image[0].filename : null }, { where: { id } });
                         if (status === "Clear") {
                             if (creator_result === "Win") {
-                                creatorUser.win_coin += ((challenge.amount - challenge.amount * 10 / 100) * 2);
+                                creatorUser.win_coin += (challenge.amount * process.env.WIN_PERCENTAGE) / 100;
                                 await creatorUser.save();
                                 if (creatorUser.referral_code) {
                                     const referralUser = await User.findOne({ where: { invite_code: creatorUser.referral_code } });
                                     if (referralUser) {
-                                        referralUser.refer_coin += (challenge.amount * 5 / 100);
+                                        referralUser.refer_coin += (challenge.amount * process.env.REFER_PERCENTAGE) / 100;
                                         await referralUser.save();
                                     }
                                 }
                             } else {
-                                joinerUser.win_coin += ((challenge.amount - challenge.amount * 10 / 100) * 2);
+                                joinerUser.win_coin += (challenge.amount * process.env.WIN_PERCENTAGE) / 100;
                                 await joinerUser.save();
                                 if (joinerUser.referral_code) {
                                     const referralUser = await User.findOne({ where: { invite_code: joinerUser.referral_code } });
                                     if (referralUser) {
-                                        referralUser.refer_coin += (challenge.amount * 5 / 100);
+                                        referralUser.refer_coin += (challenge.amount * process.env.REFER_PERCENTAGE) / 100;
                                         await referralUser.save();
                                     }
                                 }
@@ -382,22 +385,22 @@ class ChallengeController {
                         const [updatedRowsCount] = await Challenge.update({ ...req.body, challenge_status: status, joiner_result, updated_by, joiner_result_image: req.files.joiner_result_image ? req.files.joiner_result_image[0].filename : null }, { where: { id } });
                         if (status === "Clear") {
                             if (joiner_result === "Win") {
-                                joinerUser.win_coin += ((challenge.amount - challenge.amount * 10 / 100) * 2);
+                                joinerUser.win_coin += (challenge.amount * process.env.WIN_PERCENTAGE) / 100;
                                 await joinerUser.save();
                                 if (joinerUser.referral_code) {
                                     const referralUser = await User.findOne({ where: { invite_code: joinerUser.referral_code } });
                                     if (referralUser) {
-                                        referralUser.refer_coin += (challenge.amount * 5 / 100);
+                                        referralUser.refer_coin += (challenge.amount * process.env.REFER_PERCENTAGE) / 100;
                                         await referralUser.save();
                                     }
                                 }
                             } else {
-                                creatorUser.win_coin += ((challenge.amount - challenge.amount * 10 / 100) * 2);
+                                creatorUser.win_coin += (challenge.amount * process.env.WIN_PERCENTAGE) / 100;
                                 await creatorUser.save();
                                 if (creatorUser.referral_code) {
                                     const referralUser = await User.findOne({ where: { invite_code: creatorUser.referral_code } });
                                     if (referralUser) {
-                                        referralUser.refer_coin += (challenge.amount * 5 / 100);
+                                        referralUser.refer_coin += (challenge.amount * process.env.REFER_PERCENTAGE) / 100;
                                         await referralUser.save();
                                     }
                                 }
@@ -464,12 +467,12 @@ class ChallengeController {
 
                         if (creatorUser) {
                             if (creator_result === "Win") {
-                                creatorUser.win_coin += ((challenge.amount - challenge.amount * 10 / 100) * 2);
+                                creatorUser.win_coin += (challenge.amount * process.env.WIN_PERCENTAGE) / 100;
                                 await creatorUser.save();
                                 if (creatorUser.referral_code) {
                                     const referralUser = await User.findOne({ where: { invite_code: creatorUser.referral_code } });
                                     if (referralUser) {
-                                        referralUser.refer_coin += (challenge.amount * 5 / 100);
+                                        referralUser.refer_coin += (challenge.amount * process.env.REFER_PERCENTAGE) / 100;
                                         await referralUser.save();
                                     }
                                 }
@@ -483,12 +486,12 @@ class ChallengeController {
 
                         if (joinerUser) {
                             if (joiner_result === "Win") {
-                                joinerUser.win_coin += ((challenge.amount - challenge.amount * 10 / 100) * 2);
+                                joinerUser.win_coin += (challenge.amount * process.env.WIN_PERCENTAGE) / 100;
                                 await joinerUser.save();
                                 if (joinerUser.referral_code) {
                                     const referralUser = await User.findOne({ where: { invite_code: joinerUser.referral_code } });
                                     if (referralUser) {
-                                        referralUser.refer_coin += (challenge.amount * 5 / 100);
+                                        referralUser.refer_coin += (challenge.amount * process.env.REFER_PERCENTAGE) / 100;
                                         await referralUser.save();
                                     }
                                 }
