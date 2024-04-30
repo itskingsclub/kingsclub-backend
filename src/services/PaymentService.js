@@ -2,17 +2,21 @@ const Payment = require('../models/Payment')
 
 class PaymentService {
     static async createPayment(payload) {
-        const { user_id } = payload.body;
         try {
             const newPayment = await Payment.create({
-                ...payload?.body,
-                updated_by: payload?.updated_by || user_id,
+                user_id: payload?.user_id,
+                payment_mode: payload?.payment_mode,
+                payment_status: payload?.payment_status,
                 type: payload?.type,
-                payment_mode: payload?.payment_mode || "Upi",
-                payment_status: payload?.payment_status || "Pending",
+                updated_by: payload?.updated_by,
+                amount: payload?.amount,
+                ...(payload?.payment_id && {
+                    payment_id: payload?.payment_id,
+                }),
                 ...(payload?.files?.image && {
                     image: payload?.files?.image[0]?.filename,
                 }),
+                ...payload?.body,
             });
 
             if (newPayment) {
@@ -27,6 +31,7 @@ class PaymentService {
                 message: "Error creting payment"
             }
         } catch (error) {
+            console.log("PV", error)
             return {
                 success: false,
                 message: "Internal Server Error",

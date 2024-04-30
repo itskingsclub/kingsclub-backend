@@ -1,8 +1,12 @@
+const dotenv = require('dotenv');
 const User = require('../models/User');
 const OtpService = require("../services/OtpService");
 const { generateInviteCode } = require("../utils/numberUtils");
 const Challenge = require('../models/Challenge');
 const { Op } = require('sequelize');
+
+dotenv.config();
+
 class UserController {
     // Create a new user
     static async createUser(req, res) {
@@ -214,6 +218,11 @@ class UserController {
                     res.status(200).json({
                         success: true,
                         message: verifyOTP?.message,
+                        percentage: {
+                            win_percentage: process.env.WIN_PERCENTAGE,
+                            platform_percentage: process.env.PLATFORM_PERCENTAGE,
+                            refer_percentage: process.env.REFER_PERCENTAGE,
+                        },
                         token: verifyOTP?.token,
                         data: user,
                     });
@@ -281,6 +290,7 @@ class UserController {
             for (const user of users) {
                 const challenges = await Challenge.findAll({
                     where: {
+                        challenge_status: 'Clear',
                         [Op.or]: [
                             { creator: user.id, creator_result: 'Win' },
                             { joiner: user.id, joiner_result: 'Win' }
@@ -289,7 +299,7 @@ class UserController {
                     }
                 });
                 const totalWinCoin = challenges.reduce((total, challenge) => {
-                    return total + (challenge.creator === user.id ? ((challenge.amount * 17) / 10) : -((challenge.amount * 17) / 10));
+                    return total + (challenge.creator === user.id ? ((challenge.amount * process.env.WIN_PERCENTAGE) / 100) : 0);
                 }, 0);
                 if (totalWinCoin !== 0) {
                     leaderboardData.push({
