@@ -25,13 +25,13 @@ const Payment = sequelize.define('Payment', {
         type: DataTypes.STRING(45),
     },
     payment_mode: {
-        type: DataTypes.ENUM('Upi', 'Netbanking', 'Admin'),
+        type: DataTypes.ENUM('Upi', 'Netbanking', 'Admin', 'User'),
     },
     payment_status: {
         type: DataTypes.ENUM('Sucessfull', 'Pending', 'Fraud', 'Cancel'),
     },
     type: {
-        type: DataTypes.ENUM('Withdraw', 'Deposit'),
+        type: DataTypes.ENUM('Withdraw', 'Deposit', 'Accept Challenge', 'Create Challenge', 'Cancel Challenge', 'Win Challenge'),
     },
     remark: {
         type: DataTypes.STRING(100),

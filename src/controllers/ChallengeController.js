@@ -4,6 +4,7 @@ const User = require('../models/User');
 const { Op } = require("sequelize");
 const { getChallengeStatus, hasPendingResults } = require("../utils/resultUtils");
 const { calculateCoinDeductions } = require("../utils/numberUtils");
+const PaymentService = require('../services/PaymentService');
 
 dotenv.config();
 
@@ -58,11 +59,21 @@ class ChallengeController {
                     creatorUser.refer_coin -= deductions?.referCoinDeduction;
                     await creatorUser.save();
 
-                    res.status(201).json({
-                        success: true,
-                        message: "Challenge created successfully",
-                        data: newChallenge
-                    });
+                    const payment = await PaymentService.createPayment({ ...req, type: 'Create Challenge', payment_mode: "User", payment_status: "Sucessfull", updated_by: creator, user_id: creator, payment_id: newChallenge?.id });
+                    console.log("PV 1", payment)
+                    if (payment?.success) {
+                        res.status(201).json({
+                            success: true,
+                            message: "Challenge created successfully",
+                            data: newChallenge
+                        });
+                    }
+                    else {
+                        res.status(500).json({
+                            success: false,
+                            message: 'Error creating challenge'
+                        });
+                    }
                 }
             }
 
@@ -593,10 +604,20 @@ class ChallengeController {
                                         joinerUser.win_coin -= deductions?.winCoinDeduction;
                                         joinerUser.refer_coin -= deductions?.referCoinDeduction;
                                         await joinerUser.save();
-                                        res.status(200).json({
-                                            success: true,
-                                            message: 'Challenge accepted successfully'
-                                        });
+
+                                        const payment = await PaymentService.createPayment({ ...req, type: 'Accept Challenge', payment_mode: "User", payment_status: "Sucessfull", updated_by: joiner, user_id: joiner, amount: amount, payment_id: id });
+                                        if (payment?.success) {
+                                            res.status(200).json({
+                                                success: true,
+                                                message: "Challenge accepted successfully",
+                                            });
+                                        }
+                                        else {
+                                            res.status(500).json({
+                                                success: false,
+                                                message: 'Error accepting challenge'
+                                            });
+                                        }
                                     } else {
                                         res.status(404).json({
                                             success: false,
