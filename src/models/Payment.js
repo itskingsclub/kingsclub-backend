@@ -31,7 +31,7 @@ const Payment = sequelize.define('Payment', {
         type: DataTypes.ENUM('Sucessfull', 'Pending', 'Fraud', 'Cancel'),
     },
     type: {
-        type: DataTypes.ENUM('Withdraw', 'Deposit', 'Accept Challenge', 'Create Challenge', 'Cancel Challenge', 'Win Challenge'),
+        type: DataTypes.ENUM('Withdraw', 'Deposit', 'Accept Challenge', 'Create Challenge', 'Cancel Challenge', 'Win Challenge', "Referral"),
     },
     remark: {
         type: DataTypes.STRING(100),

@@ -60,7 +60,6 @@ class ChallengeController {
                     await creatorUser.save();
 
                     const payment = await PaymentService.createPayment({ ...req, type: 'Create Challenge', payment_mode: "User", payment_status: "Sucessfull", updated_by: creator, user_id: creator, payment_id: newChallenge?.id });
-                    console.log("PV 1", payment)
                     if (payment?.success) {
                         res.status(201).json({
                             success: true,
@@ -342,21 +341,31 @@ class ChallengeController {
                             if (creator_result === "Win") {
                                 creatorUser.win_coin += (challenge.amount * process.env.WIN_PERCENTAGE) / 100;
                                 await creatorUser.save();
+
+                                await PaymentService.createPayment({ ...req, type: 'Win Challenge', payment_mode: "User", payment_status: "Sucessfull", updated_by: challenge?.creator, user_id: challenge?.creator, payment_id: id, amount: challenge.amount });
+
                                 if (creatorUser.referral_code) {
                                     const referralUser = await User.findOne({ where: { invite_code: creatorUser.referral_code } });
                                     if (referralUser) {
                                         referralUser.refer_coin += (challenge.amount * process.env.REFER_PERCENTAGE) / 100;
                                         await referralUser.save();
+
+                                        await PaymentService.createPayment({ ...req, type: 'Referral', payment_mode: "User", payment_status: "Sucessfull", updated_by: referralUser?.id, user_id: referralUser?.id, payment_id: id, amount: (challenge.amount * process.env.REFER_PERCENTAGE) / 100 });
                                     }
                                 }
                             } else {
                                 joinerUser.win_coin += (challenge.amount * process.env.WIN_PERCENTAGE) / 100;
                                 await joinerUser.save();
+
+                                await PaymentService.createPayment({ ...req, type: 'Win Challenge', payment_mode: "User", payment_status: "Sucessfull", updated_by: challenge?.joiner, user_id: challenge?.joiner, payment_id: id, amount: challenge.amount });
+
                                 if (joinerUser.referral_code) {
                                     const referralUser = await User.findOne({ where: { invite_code: joinerUser.referral_code } });
                                     if (referralUser) {
                                         referralUser.refer_coin += (challenge.amount * process.env.REFER_PERCENTAGE) / 100;
                                         await referralUser.save();
+
+                                        await PaymentService.createPayment({ ...req, type: 'Referral', payment_mode: "User", payment_status: "Sucessfull", updated_by: referralUser?.id, user_id: referralUser?.id, payment_id: id, amount: (challenge.amount * process.env.REFER_PERCENTAGE) / 100 });
                                     }
                                 }
                             }
@@ -364,9 +373,14 @@ class ChallengeController {
                         else if (status === "Cancel") {
                             creatorUser.game_coin += challenge.amount;
                             await creatorUser.save();
+
+                            await PaymentService.createPayment({ ...req, type: 'Cancel Challenge', payment_mode: "User", payment_status: "Sucessfull", updated_by: challenge?.creator, user_id: challenge?.creator, payment_id: id, amount: challenge.amount });
+
                             if (joinerUser) {
                                 joinerUser.game_coin += challenge.amount;
                                 await joinerUser.save();
+
+                                await PaymentService.createPayment({ ...req, type: 'Cancel Challenge', payment_mode: "User", payment_status: "Sucessfull", updated_by: challenge?.joiner, user_id: challenge?.joiner, payment_id: id, amount: challenge.amount });
                             }
                         }
                         if (updatedRowsCount > 0) {
@@ -398,21 +412,31 @@ class ChallengeController {
                             if (joiner_result === "Win") {
                                 joinerUser.win_coin += (challenge.amount * process.env.WIN_PERCENTAGE) / 100;
                                 await joinerUser.save();
+
+                                await PaymentService.createPayment({ ...req, type: 'Win Challenge', payment_mode: "User", payment_status: "Sucessfull", updated_by: challenge?.joiner, user_id: challenge?.joiner, payment_id: id, amount: challenge.amount });
+
                                 if (joinerUser.referral_code) {
                                     const referralUser = await User.findOne({ where: { invite_code: joinerUser.referral_code } });
                                     if (referralUser) {
                                         referralUser.refer_coin += (challenge.amount * process.env.REFER_PERCENTAGE) / 100;
                                         await referralUser.save();
+
+                                        await PaymentService.createPayment({ ...req, type: 'Referral', payment_mode: "User", payment_status: "Sucessfull", updated_by: referralUser?.id, user_id: referralUser?.id, payment_id: id, amount: (challenge.amount * process.env.REFER_PERCENTAGE) / 100 });
                                     }
                                 }
                             } else {
                                 creatorUser.win_coin += (challenge.amount * process.env.WIN_PERCENTAGE) / 100;
                                 await creatorUser.save();
+
+                                await PaymentService.createPayment({ ...req, type: 'Win Challenge', payment_mode: "User", payment_status: "Sucessfull", updated_by: challenge?.creator, user_id: challenge?.creator, payment_id: id, amount: challenge.amount });
+
                                 if (creatorUser.referral_code) {
                                     const referralUser = await User.findOne({ where: { invite_code: creatorUser.referral_code } });
                                     if (referralUser) {
                                         referralUser.refer_coin += (challenge.amount * process.env.REFER_PERCENTAGE) / 100;
                                         await referralUser.save();
+
+                                        await PaymentService.createPayment({ ...req, type: 'Referral', payment_mode: "User", payment_status: "Sucessfull", updated_by: referralUser?.id, user_id: referralUser?.id, payment_id: id, amount: (challenge.amount * process.env.REFER_PERCENTAGE) / 100 });
                                     }
                                 }
                             }
@@ -422,6 +446,9 @@ class ChallengeController {
                             joinerUser.game_coin += challenge.amount;
                             await creatorUser.save();
                             await joinerUser.save();
+
+                            await PaymentService.createPayment({ ...req, type: 'Win Challenge', payment_mode: "User", payment_status: "Sucessfull", updated_by: challenge?.creator, user_id: challenge?.creator, payment_id: id, amount: challenge.amount });
+                            await PaymentService.createPayment({ ...req, type: 'Win Challenge', payment_mode: "User", payment_status: "Sucessfull", updated_by: challenge?.joiner, user_id: challenge?.joiner, payment_id: id, amount: challenge.amount });
                         }
                         if (updatedRowsCount > 0) {
                             res.status(200).json({
