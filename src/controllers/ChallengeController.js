@@ -499,12 +499,15 @@ class ChallengeController {
                 const challenge = await Challenge.findOne({ where: { id } });
                 if (challenge) {
                     const joinerUser = await User.findOne({ where: { id: challenge.joiner } });
+                    console.log("joinerUser44", joinerUser.win_coin)
                     const creatorUser = await User.findOne({ where: { id: challenge.creator } });
+                    console.log("creatorUser44", creatorUser.win_coin)
 
                     if (!(creator_result === "Win" && joiner_result === "Win") && !((creator_result === "Cancel" && joiner_result !== "Cancel") || (creator_result !== "Cancel" && joiner_result === "Cancel"))) {
 
                         if (creatorUser) {
                             if (creator_result === "Win") {
+
                                 creatorUser.win_coin += (challenge.amount * process.env.WIN_PERCENTAGE) / 100;
                                 await creatorUser.save();
 
@@ -588,7 +591,7 @@ class ChallengeController {
                 });
             }
         } catch (error) {
-            console.error(error);
+            console.error("error2", error);
             res.status(500).json({
                 success: false,
                 message: 'Error updating challenge result'

@@ -54,6 +54,15 @@ const getBanks = (req, res) => {
     });
 };
 
+const getPercentage = (req, res) => {
+    const percentage = marketingData.percentage;
+    res.status(200).json({
+        success: true,
+        message: "Banks fetched successfully",
+        data: percentage
+    });
+};
+
 
 module.exports = {
     getPromotions,
@@ -61,5 +70,6 @@ module.exports = {
     getContactDetail,
     getPaymentDetail,
     getCancelReasons,
-    getBanks
+    getBanks,
+    getPercentage
 };

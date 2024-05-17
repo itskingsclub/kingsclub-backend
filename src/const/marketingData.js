@@ -161,6 +161,11 @@ const marketingData = {
         "State Bank of Saurashtra",
         "State Bank of Bikaner"
     ],
+    percentage: {
+        "win_percentage": "180",
+        "platform_percentage": "15",
+        "refer_percentage": "5"
+    }
 };
 
 module.exports = marketingData;
